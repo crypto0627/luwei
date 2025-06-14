@@ -41,8 +41,7 @@ CREATE TABLE `orders` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-PRAGMA foreign_keys=OFF;--> statement-breakpoint
-CREATE TABLE `__new_users` (
+CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`name` text NOT NULL,
@@ -52,8 +51,4 @@ CREATE TABLE `__new_users` (
 	`updated_at` integer DEFAULT (strftime('%s', 'now'))
 );
 --> statement-breakpoint
-INSERT INTO `__new_users`("id", "email", "name", "provider", "email_verified", "created_at", "updated_at") SELECT "id", "email", "name", "provider", "email_verified", "created_at", "updated_at" FROM `users`;--> statement-breakpoint
-DROP TABLE `users`;--> statement-breakpoint
-ALTER TABLE `__new_users` RENAME TO `users`;--> statement-breakpoint
-PRAGMA foreign_keys=ON;--> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);

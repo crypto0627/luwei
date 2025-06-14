@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8787/api/auth";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth`
 
 export class AuthService {
   private static instance: AuthService;

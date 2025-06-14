@@ -1,7 +1,7 @@
 import axios from "axios";
 import { CartItem } from "@/types/cart-types";
 
-const API_URL = "http://localhost:8787/api/order";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/order`
 
 export class OrderService {
   private static instance: OrderService;

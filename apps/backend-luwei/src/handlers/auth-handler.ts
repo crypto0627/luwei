@@ -93,16 +93,17 @@ export const handleGoogleAuth = async (c: Context) => {
     // Set cookie
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       path: "/",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 150, // 150 days
+      domain: "luwei.pages.dev"
     });
     setCookie(c, "state", "", {
       path: "/",
       maxAge: 0,
     });
-    return c.redirect("http://localhost:3000")
+    return c.redirect("https://luwei.pages.dev")
   } catch (error) {
     console.error("Error in Google authentication:", error);
     return c.json({ error: "Internal server error" }, 500);
