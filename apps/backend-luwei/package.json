@@ -1,0 +1,23 @@
+{
+	"name": "backend-luwei",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"db:up": "drizzle-kit up",
+		"db:generate": "drizzle-kit generate"
+	},
+	"dependencies": {
+		"@hono/oauth-providers": "^0.8.1",
+		"bcryptjs": "^3.0.2",
+		"drizzle-kit": "^0.31.1",
+		"drizzle-orm": "^0.44.2",
+		"google-auth-library": "^10.1.0",
+		"hono": "^4.7.11",
+		"resend": "^4.5.2",
+		"uuid": "^11.1.0"
+	},
+	"devDependencies": {
+		"wrangler": "^4.19.1"
+	}
+}
