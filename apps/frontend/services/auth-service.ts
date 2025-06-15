@@ -90,9 +90,7 @@ export class AuthService {
       },
       auto_select: false,
       cancel_on_tap_outside: false,
-      context: 'signin',
-      use_fedcm_for_prompt: true,
-      prompt_parent_id: 'google-signin-container'
+      context: 'signin'
     });
 
     this.googleInitialized = true;
@@ -114,33 +112,6 @@ export class AuthService {
               console.log('Sign-in was dismissed');
             }
           });
-
-          // 監聽登入成功事件
-          // @ts-ignore
-          google.accounts.id.renderButton(
-            document.getElementById('google-signin-container'),
-            { 
-              type: 'standard', 
-              theme: 'outline', 
-              size: 'large', 
-              width: '100%',
-              callback: async (response: any) => {
-                try {
-                  const result = await axios.post(
-                    `${API_URL}/google/callback`,
-                    { credential: response.credential },
-                    {
-                      headers: this.getHeaders(),
-                      withCredentials: true
-                    }
-                  );
-                  resolve(result.data);
-                } catch (error) {
-                  reject(this.handleError(error));
-                }
-              }
-            }
-          );
         } catch (error) {
           reject(this.handleError(error));
         }
