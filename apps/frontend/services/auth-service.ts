@@ -109,13 +109,38 @@ export class AuthService {
             if (notification.isNotDisplayed()) {
               reject(new Error('Google Sign-In was not displayed'));
             } else if (notification.isSkippedMoment()) {
-              // 不要在這裡 reject，因為用戶可能只是暫時跳過
               console.log('Sign-in was skipped');
             } else if (notification.isDismissedMoment()) {
-              // 不要在這裡 reject，因為用戶可能只是暫時關閉
               console.log('Sign-in was dismissed');
             }
           });
+
+          // 監聽登入成功事件
+          // @ts-ignore
+          google.accounts.id.renderButton(
+            document.getElementById('google-signin-container'),
+            { 
+              type: 'standard', 
+              theme: 'outline', 
+              size: 'large', 
+              width: '100%',
+              callback: async (response: any) => {
+                try {
+                  const result = await axios.post(
+                    `${API_URL}/google/callback`,
+                    { credential: response.credential },
+                    {
+                      headers: this.getHeaders(),
+                      withCredentials: true
+                    }
+                  );
+                  resolve(result.data);
+                } catch (error) {
+                  reject(this.handleError(error));
+                }
+              }
+            }
+          );
         } catch (error) {
           reject(this.handleError(error));
         }

@@ -27,8 +27,10 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await authService.signInWithGoogle();
-      if (result.user) {
+      console.log('Login result:', result);
+      if (result && result.user) {
         router.push("/");
+        router.refresh(); // 強制刷新頁面以更新用戶狀態
       }
     } catch (error) {
       console.error("Google 登入失敗:", error);
