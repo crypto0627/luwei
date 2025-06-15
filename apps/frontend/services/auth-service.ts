@@ -72,26 +72,9 @@ export class AuthService {
     // @ts-ignore
     google.accounts.id.initialize({
       client_id: clientId,
-      callback: async (response: any) => {
-        try {
-          // Send the credential to your backend
-          const result = await axios.post(
-            `${API_URL}/google/callback`,
-            { credential: response.credential },
-            {
-              headers: this.getHeaders(),
-              withCredentials: true
-            }
-          );
-          return result.data;
-        } catch (error) {
-          throw this.handleError(error);
-        }
-      },
       auto_select: false,
       cancel_on_tap_outside: false,
       context: 'signin',
-      use_fedcm_for_prompt: true,
       ux_mode: 'popup'
     });
 
@@ -104,18 +87,6 @@ export class AuthService {
 
       return new Promise((resolve, reject) => {
         try {
-          // @ts-ignore
-          google.accounts.id.prompt((notification: any) => {
-            if (notification.isNotDisplayed()) {
-              reject(new Error('Google Sign-In was not displayed'));
-            } else if (notification.isSkippedMoment()) {
-              console.log('Sign-in was skipped');
-            } else if (notification.isDismissedMoment()) {
-              console.log('Sign-in was dismissed');
-            }
-          });
-
-          // 監聽登入成功事件
           // @ts-ignore
           google.accounts.id.renderButton(
             document.getElementById('google-signin-container'),
