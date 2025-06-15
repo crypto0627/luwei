@@ -88,6 +88,9 @@ export class AuthService {
           throw this.handleError(error);
         }
       },
+      auto_select: false,
+      cancel_on_tap_outside: false,
+      context: 'signin'
     });
 
     this.googleInitialized = true;
@@ -101,8 +104,13 @@ export class AuthService {
         try {
           // @ts-ignore
           google.accounts.id.prompt((notification: any) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              reject(new Error('Google Sign-In was not displayed or was skipped'));
+            if (notification.isNotDisplayed()) {
+              reject(new Error('Google Sign-In was not displayed'));
+            } else if (notification.isSkippedMoment()) {
+              // 不要在這裡 reject，因為用戶可能只是暫時跳過
+              console.log('Sign-in was skipped');
+            } else if (notification.isDismissedMoment()) {
+              reject(new Error('Sign-in was dismissed'));
             }
           });
         } catch (error) {

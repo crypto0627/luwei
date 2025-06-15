@@ -11,7 +11,24 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  output: "export"
+  output: "export",
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "script-src 'self' https://accounts.google.com/gsi/client; frame-src https://accounts.google.com/gsi/; connect-src https://accounts.google.com/gsi/;"
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups'
+          }
+        ]
+      }
+    ]
+  }
 }
 
 export default withPWA({
