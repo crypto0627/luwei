@@ -23,7 +23,7 @@ router.use("/google", (c, next) => {
       path: "/",
       httpOnly: true,
       secure: true,
-      sameSite: "lax", // 用 none 也可，看你的情境
+      sameSite: "none", // 用 none 也可，看你的情境
       maxAge: 300,
     });
   }

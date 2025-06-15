@@ -16,12 +16,7 @@ export const logout = async (c: Context) => {
     path: "/",
     sameSite: "none",
   });
-  // await deleteCookie(c, "auth_token", {
-  //   httpOnly: true,
-  //   secure: false,
-  //   path: "/",
-  //   sameSite: "lax",
-  // });
+
   return c.json({ message: "已登出" });
 };
 
@@ -131,8 +126,8 @@ function getRedirectUrl(uri: string): string {
     const hostname = url.hostname;
     
     // 開發環境
-    if (hostname === "localhost" && url.port === "3000") {
-      return "http://localhost:3000/main/dashboard";
+    if (hostname === "luwei-manager.pages.dev") {
+      return "https://luwei-manager.pages.dev/main/dashboard";
     }
     
     // 生產環境

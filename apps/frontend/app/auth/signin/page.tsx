@@ -19,15 +19,15 @@ export default function SignInPage() {
     }
   };
 
-  const handleLineSignIn = async () => {
-    try {
-      await authService.signInWithLine();
-      router.push("/");
-    } catch (error) {
-      console.error("LINE 登入失敗:", error);
-      alert("LINE 登入失敗，請稍後再試。");
-    }
-  };
+  // const handleLineSignIn = async () => {
+  //   try {
+  //     await authService.signInWithLine();
+  //     router.push("/");
+  //   } catch (error) {
+  //     console.error("LINE 登入失敗:", error);
+  //     alert("LINE 登入失敗，請稍後再試。");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-white flex items-center justify-center p-4">
@@ -68,7 +68,7 @@ export default function SignInPage() {
               <span className="text-base">使用 Google 登入</span>
             </Button>
 
-            <Button
+            {/* <Button
               onClick={handleLineSignIn}
               variant="outline"
               className="w-full h-12 border-amber-200 hover:bg-amber-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-white"
@@ -80,7 +80,7 @@ export default function SignInPage() {
                 />
               </svg>
               <span className="text-base">使用 LINE 登入</span>
-            </Button>
+            </Button> */}
 
             <div className="pt-4 text-center">
               <p className="text-xs text-amber-600">
