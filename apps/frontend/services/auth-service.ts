@@ -72,23 +72,27 @@ export class AuthService {
     // @ts-ignore
     google.accounts.id.initialize({
       client_id: clientId,
-      auto_select: false,
-      cancel_on_tap_outside: false,
-      context: 'signin',
+      callback: this.handleCredentialResponse.bind(this),
       ux_mode: 'popup'
     });
 
-    // @ts-ignore
-    google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
-      }
-      if (notification.isSkippedMoment()) {
-        console.warn('One Tap skipped:', notification.getSkippedReason());
-      }
-    });
-
     this.googleInitialized = true;
+  }
+
+  private async handleCredentialResponse(response: any) {
+    try {
+      const result = await axios.post(
+        `${API_URL}/google/callback`,
+        { credential: response.credential },
+        {
+          headers: this.getHeaders(),
+          withCredentials: true
+        }
+      );
+      return result.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
   }
 
   async signInWithGoogle(): Promise<{ user: { id: string; email: string; name: string } }> {
@@ -103,24 +107,8 @@ export class AuthService {
             { 
               type: 'standard', 
               theme: 'outline', 
-              size: 'large', 
-              width: '100%',
-              ux_mode: 'popup',
-              callback: async (response: any) => {
-                try {
-                  const result = await axios.post(
-                    `${API_URL}/google/callback`,
-                    { credential: response.credential },
-                    {
-                      headers: this.getHeaders(),
-                      withCredentials: true
-                    }
-                  );
-                  resolve(result.data);
-                } catch (error) {
-                  reject(this.handleError(error));
-                }
-              }
+              size: 'large',
+              width: '100%'
             }
           );
         } catch (error) {
