@@ -67,11 +67,13 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
-        <Script 
+        
+        {/* Google Identity Services script */}
+        <Script
           src="https://accounts.google.com/gsi/client"
-          strategy="afterInteractive"
           async
           defer
+          strategy="beforeInteractive"
         />
       </head>
       <body className={inter.className}>
