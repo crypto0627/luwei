@@ -90,7 +90,8 @@ export class AuthService {
       },
       auto_select: false,
       cancel_on_tap_outside: false,
-      context: 'signin'
+      context: 'signin',
+      use_fedcm_for_prompt: true
     });
 
     this.googleInitialized = true;
