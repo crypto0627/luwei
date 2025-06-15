@@ -7,8 +7,7 @@ import { CartProvider } from "@/contexts/cart-context";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/contexts/auth-context";
-// import { GoogleAnalytics } from "@next/third-parties/google";
-// import Script from "next/script";
+import Script from "next/script";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -85,6 +84,14 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
+        
+        {/* Google Identity Services script */}
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          async
+          defer
+          strategy="beforeInteractive"
+        />
       </head>
       <body
         className={`${inter.className} ${montserrat.variable} ${notoSansTC.variable}`}
@@ -96,11 +103,6 @@ export default function RootLayout({
             <Footer />
           </CartProvider>
         </AuthProvider>
-        {/* <GoogleAnalytics gaId="G-FEKDYZSNEC" />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-FEKDYZSNEC"
-          strategy="afterInteractive"
-        /> */}
       </body>
     </html>
   );

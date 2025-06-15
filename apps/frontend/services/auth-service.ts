@@ -79,7 +79,7 @@ export class AuthService {
     this.googleInitialized = true;
   }
 
-  private async handleCredentialResponse(response: any) {
+  public async handleCredentialResponse(response: any) {
     try {
       const result = await axios.post(
         `${API_URL}/google/callback`,
