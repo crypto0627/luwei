@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useUserStore } from "@/stores/useUserStore"
 import authService from "@/services/auth-service"
 
@@ -113,21 +112,27 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-white">滷</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="border-0 shadow-2xl bg-white">
+          <div className="flex flex-col p-6 text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">滷</span>
+            </div>
+            <div className="tracking-tight text-2xl font-bold text-gray-800">
+              大竹小倆口滷味
+            </div>
+            <div className="text-sm text-gray-600">
+              管理後台登入
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">大竹小倆口滷味</CardTitle>
-          <CardDescription className="text-gray-600">管理後台登入</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div id="google-signin-container" className="w-full">
-            {/* Google Sign-In button will be rendered here */}
-          </div>
-        </CardContent>
-      </Card>
+          <CardContent className="p-6 pt-0 space-y-4">
+            <div id="google-signin-container" className="w-full">
+              {/* Google Sign-In button will be rendered here */}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
