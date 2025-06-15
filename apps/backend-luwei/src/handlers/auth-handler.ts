@@ -14,8 +14,14 @@ export const logout = async (c: Context) => {
     httpOnly: true,
     secure: true,
     path: "/",
-    sameSite: "lax",
+    sameSite: "none",
   });
+  // await deleteCookie(c, "auth_token", {
+  //   httpOnly: true,
+  //   secure: false,
+  //   path: "/",
+  //   sameSite: "lax",
+  // });
   return c.json({ message: "已登出" });
 };
 
@@ -50,14 +56,13 @@ export const me = async (c: Context) => {
 export const handleGoogleAuth = async (c: Context) => {
   try {
     const db = getDB(c);
-    const token = c.get('token')
     const user = c.get("user-google");
-    const grantedScopes = c.get('granted-scopes')
+
     if (!user || !user.email || !user.name) {
       return c.json({ error: "Google authentication failed" }, 401);
     }
 
-    // Check if user exists
+    // 找或創建使用者
     let existingUser = await db
       .select()
       .from(users)
@@ -66,8 +71,7 @@ export const handleGoogleAuth = async (c: Context) => {
       .then((rows) => rows[0]);
 
     if (!existingUser) {
-      // Create new user
-      const newUser = {
+      existingUser = {
         id: uuidv4(),
         email: user.email,
         name: user.name,
@@ -76,36 +80,70 @@ export const handleGoogleAuth = async (c: Context) => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-
-      await db.insert(users).values(newUser);
-      existingUser = newUser;
+      await db.insert(users).values(existingUser);
     }
 
-    // Generate JWT token
+    // 產生 JWT 並設 cookie
     const jwt_token = await sign(
-      { 
+      {
         sub: existingUser.id,
-        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 150) // 150 days in seconds
-      }, 
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 150,
+      },
       c.env.JWT_SECRET
     );
 
-    // Set cookie
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,
       secure: true,
       path: "/",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 150, // 150 days
-      domain: "luwei.pages.dev"
+      sameSite: "none",
+      maxAge: 60 * 60 * 24 * 150,
     });
-    setCookie(c, "state", "", {
-      path: "/",
-      maxAge: 0,
-    });
-    return c.redirect("https://luwei.pages.dev")
+  
+    // 清除 state
+    setCookie(c, "state", "", { path: "/", maxAge: 0 });
+
+    // 讀取 redirect_uri 並導回
+    const redirectUri = getCookie(c, "redirect_uri");
+    const fallback = "https://luwei.pages.dev";
+    
+    console.log("Raw redirectUri:", redirectUri);
+    
+    if (!redirectUri) {
+      console.log("No redirectUri provided, using fallback");
+      return c.redirect(fallback);
+    }
+
+    // 根據不同環境決定重定向目標
+    const redirectUrl = getRedirectUrl(redirectUri);
+    console.log("Final redirectUrl:", redirectUrl);
+    
+    return c.redirect(redirectUrl);
   } catch (error) {
     console.error("Error in Google authentication:", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 };
+
+function getRedirectUrl(uri: string): string {
+  try {
+    const url = new URL(uri);
+    const hostname = url.hostname;
+    
+    // 開發環境
+    if (hostname === "localhost" && url.port === "3000") {
+      return "http://localhost:3000/main/dashboard";
+    }
+    
+    // 生產環境
+    if (hostname === "luwei.pages.dev") {
+      return "https://luwei.pages.dev";
+    }
+    
+    // 預設重定向
+    return "https://luwei.pages.dev/main/dashboard";
+  } catch (error) {
+    console.error("Invalid URL format:", error);
+    return "https://luwei.pages.dev/main/dashboard";
+  }
+}

@@ -50,7 +50,7 @@ export class OrderService {
 
   async monitor() {
     try {
-      const response = await axios.get(
+      const response = await axios.post(
         `${API_URL}/monitor`,
         { 
           headers: this.getHeaders(),

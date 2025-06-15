@@ -26,7 +26,7 @@ export const checkout = async (c: Context) => {
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.id, userId))
+      .where(eq(users.id, userId as string))
       .limit(1)
       .then((rows) => rows[0]);
 
@@ -38,10 +38,10 @@ export const checkout = async (c: Context) => {
     const items = body.items;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return c.json({ error: "Invalid order items" }, 400);
+      return c.json({ error: "購物車是空的，無法結帳" }, 400);
     }
 
-    // Validate all meal IDs exist
+    // Validate all meal IDs exist and check availability
     const mealIds = items.map(item => item.meal.id);
     const existingMeals = await db
       .select()
@@ -49,7 +49,16 @@ export const checkout = async (c: Context) => {
       .where(inArray(meals.id, mealIds));
 
     if (existingMeals.length !== mealIds.length) {
-      return c.json({ error: "Some meals do not exist" }, 400);
+      return c.json({ error: "部分商品不存在" }, 400);
+    }
+
+    // Check if any meal is not available
+    const unavailableMeals = existingMeals.filter(meal => !meal.isAvailable);
+    if (unavailableMeals.length > 0) {
+      return c.json({ 
+        error: "部分商品已售完", 
+        unavailableMeals: unavailableMeals.map(meal => meal.name)
+      }, 400);
     }
 
     // Calculate total amount
@@ -81,13 +90,13 @@ export const checkout = async (c: Context) => {
     await db.insert(orderItems).values(orderItemsData);
 
     return c.json({
-      message: "Order created successfully",
+      message: "訂單建立成功",
       orderId,
       totalAmount,
     });
   } catch (error) {
     console.error("Error in checkout:", error);
-    return c.json({ error: "Internal server error" }, 500);
+    return c.json({ error: "系統錯誤" }, 500);
   }
 };
 
@@ -117,7 +126,7 @@ export const getOrders = async (c: Context) => {
       .from(orders)
       .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
       .leftJoin(meals, eq(orderItems.mealId, meals.id))
-      .where(eq(orders.userId, userId))
+      .where(eq(orders.userId, userId as string))
       .orderBy(orders.createdAt);
 
     // Group orders and their items
@@ -142,6 +151,123 @@ export const getOrders = async (c: Context) => {
     });
   } catch (error) {
     console.error("Error in getOrders:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+};
+
+export const getAllOrders = async (c: Context) => {
+  try {
+    const db = getDB(c);
+    const token = getCookie(c, "auth_token");
+    if (!token) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    // Get all orders with their items
+    const allOrders = await db
+      .select({
+        order: orders,
+        items: orderItems,
+        meal: meals,
+        user: users,
+      })
+      .from(orders)
+      .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .leftJoin(meals, eq(orderItems.mealId, meals.id))
+      .leftJoin(users, eq(orders.userId, users.id))
+      .orderBy(orders.createdAt);
+
+    // Group orders and their items
+    const ordersMap = new Map();
+    allOrders.forEach((row) => {
+      if (!ordersMap.has(row.order.id)) {
+        ordersMap.set(row.order.id, {
+          ...row.order,
+          items: [],
+          user: row.user,
+        });
+      }
+      if (row.items && row.meal) {
+        ordersMap.get(row.order.id).items.push({
+          ...row.items,
+          meal: row.meal,
+        });
+      }
+    });
+
+    return c.json({
+      orders: Array.from(ordersMap.values()),
+    });
+  } catch (error) {
+    console.error("Error in getAllOrders:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+};
+
+export const deleteOrder = async (c: Context) => {
+  try {
+    const db = getDB(c);
+    const token = getCookie(c, "auth_token");
+    if (!token) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const body = await c.req.json();
+    const { orderId } = body;
+
+    if (!orderId) {
+      return c.json({ error: "Order ID is required" }, 400);
+    }
+
+    // Update order status to cancelled
+    await db
+      .update(orders)
+      .set({
+        status: "cancelled",
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId));
+
+    return c.json({
+      message: "Order cancelled successfully",
+      orderId,
+    });
+  } catch (error) {
+    console.error("Error in deleteOrder:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+};
+
+export const completeOrder = async (c: Context) => {
+  try {
+    const db = getDB(c);
+    const token = getCookie(c, "auth_token");
+    if (!token) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const body = await c.req.json();
+    const { orderId } = body;
+
+    if (!orderId) {
+      return c.json({ error: "Order ID is required" }, 400);
+    }
+
+    // Update order status to completed
+    await db
+      .update(orders)
+      .set({
+        status: "completed",
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId));
+
+    return c.json({
+      message: "Order completed successfully",
+      orderId,
+    });
+  } catch (error) {
+    console.error("Error in completeOrder:", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 };

@@ -59,7 +59,7 @@ export const orderItems = sqliteTable("order_items", {
     .references(() => orders.id),
   mealId: text("meal_id")
     .notNull()
-    .references(() => meals.id),
+    .references(() => meals.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull(),
   price: real("price").notNull(), // 記錄下單時的價格
   createdAt: integer("created_at", { mode: "timestamp" }).default(
@@ -75,7 +75,7 @@ export const cartItems = sqliteTable("cart_items", {
     .references(() => users.id),
   mealId: text("meal_id")
     .notNull()
-    .references(() => meals.id),
+    .references(() => meals.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(strftime('%s', 'now'))`,

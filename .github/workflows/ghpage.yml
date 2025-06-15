@@ -1,29 +1,56 @@
-name: frontend ci
+name: Deploy Frontend and Manager
 
 on:
   push:
     branches: ['**']
+    paths:
+      - 'apps/frontend/**'
+      - 'apps/manager/**'
   pull_request:
     types: [opened, synchronize]
+    paths:
+      - 'apps/frontend/**'
+      - 'apps/manager/**'
 
 jobs:
-  build:
-    name: Build and Test
-    timeout-minutes: 15
+  changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      manager: ${{ steps.filter.outputs.manager }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'apps/frontend/**'
+            manager:
+              - 'apps/manager/**'
+
+  build:
+    name: Build Apps
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' || needs.changes.outputs.manager == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [
+          { name: 'frontend', path: 'frontend', condition: 'needs.changes.outputs.frontend == "true"' },
+          { name: 'manager', path: 'manager', condition: 'needs.changes.outputs.manager == "true"' }
+        ]
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v3
         with:
           version: 8
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
@@ -31,6 +58,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
-        run: pnpm run build
-        working-directory: ./apps/frontend
+      - name: Build ${{ matrix.app.name }}
+        if: ${{ matrix.app.condition }}
+        run: pnpm run build --filter=${{ matrix.app.path }}
+        env:
+          DISABLE_ESLINT_PLUGIN: true
+          NEXT_TELEMETRY_DISABLED: 1
