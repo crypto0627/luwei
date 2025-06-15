@@ -93,7 +93,7 @@ export class AuthService {
     this.googleInitialized = true;
   }
 
-  async signInWithGoogle() {
+  async signInWithGoogle(): Promise<{ user: { id: string; email: string; name: string } }> {
     try {
       this.initializeGoogle();
 
