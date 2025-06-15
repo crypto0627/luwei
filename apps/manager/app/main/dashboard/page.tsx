@@ -115,7 +115,8 @@ export default function DashboardPage() {
     total: orders.length,
     completed: orders.filter((o) => o.status === "completed").length,
     pending: orders.filter((o) => o.status === "pending").length,
-    revenue: orders.filter((o) => o.status === "completed").reduce((sum, o) => sum + o.totalAmount, 0),
+    paid: orders.filter((o) => o.status === "paid").length,
+    revenue: orders.filter((o) => o.status === "paid").reduce((sum, o) => sum + o.totalAmount, 0),
   }
 
   if (isLoading) {
@@ -154,11 +155,11 @@ export default function DashboardPage() {
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">已完成</p>
-                <p className="text-xl md:text-2xl font-bold text-green-600">{stats.completed}</p>
+                <p className="text-sm font-medium text-gray-600">已付款</p>
+                <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.paid}</p>
               </div>
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -182,7 +183,7 @@ export default function DashboardPage() {
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">總營收</p>
+                <p className="text-sm font-medium text-gray-600">已付款營收</p>
                 <p className="text-xl md:text-2xl font-bold text-orange-600">NT$ {stats.revenue}</p>
               </div>
               <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-lg flex items-center justify-center">

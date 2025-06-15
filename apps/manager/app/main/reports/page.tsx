@@ -33,8 +33,8 @@ export default function ReportsPage() {
     const dailyData = new Map()
     
     orders.forEach(order => {
-      // 排除已取消的訂單
-      if (order.status === "cancelled") return
+      // 只計算已付款的訂單
+      if (order.status !== "paid") return
 
       const date = new Date(order.createdAt).toLocaleDateString('zh-TW', {
         month: 'numeric',
@@ -62,6 +62,9 @@ export default function ReportsPage() {
     const productData = new Map()
     
     orders.forEach(order => {
+      // 只計算已付款的訂單
+      if (order.status !== "paid") return
+
       order.items.forEach(item => {
         const mealName = item.meal.name
         if (!productData.has(mealName)) {
@@ -93,34 +96,35 @@ export default function ReportsPage() {
     })
 
     return [
+      { name: "已付款", value: statusCount.paid, color: "#3B82F6" },
       { name: "已完成", value: statusCount.completed, color: "#10B981" },
       { name: "處理中", value: statusCount.pending, color: "#F59E0B" },
-      { name: "已付款", value: statusCount.paid, color: "#3B82F6" },
       { name: "已取消", value: statusCount.cancelled, color: "#EF4444" },
     ]
   }, [orders])
 
-  // 計算總營收和訂單數（排除已取消的訂單）
+  // 計算總營收和訂單數（只計算已付款的訂單）
   const totalRevenue = useMemo(() => 
     orders
-      .filter(order => order.status !== "cancelled")
+      .filter(order => order.status === "paid")
       .reduce((sum, order) => sum + order.totalAmount, 0),
     [orders]
   )
 
   const totalOrders = orders.length
   const cancelledOrders = orders.filter(order => order.status === "cancelled").length
+  const paidOrders = orders.filter(order => order.status === "paid").length
   const activeOrders = totalOrders - cancelledOrders
 
-  const avgOrderValue = activeOrders > 0 ? totalRevenue / activeOrders : 0
+  const avgOrderValue = paidOrders > 0 ? totalRevenue / paidOrders : 0
 
   // 計算歷史營收（按月統計）
   const historicalRevenue = useMemo(() => {
     const monthlyData = new Map()
     
     orders.forEach(order => {
-      // 排除已取消的訂單
-      if (order.status === "cancelled") return
+      // 只計算已付款的訂單
+      if (order.status !== "paid") return
 
       const date = new Date(order.createdAt)
       const monthKey = date.toLocaleDateString('zh-TW', {
@@ -172,7 +176,7 @@ export default function ReportsPage() {
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm md:text-base font-medium text-gray-600">總營收</p>
+                  <p className="text-sm md:text-base font-medium text-gray-600">已付款營收</p>
                   <p className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-1">NT$ {totalRevenue.toLocaleString()}</p>
                 </div>
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -186,8 +190,8 @@ export default function ReportsPage() {
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm md:text-base font-medium text-gray-600">總訂單數</p>
-                  <p className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-1">{activeOrders}</p>
+                  <p className="text-sm md:text-base font-medium text-gray-600">已付款訂單</p>
+                  <p className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-1">{paidOrders}</p>
                 </div>
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
