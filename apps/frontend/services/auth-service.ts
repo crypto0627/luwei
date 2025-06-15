@@ -90,7 +90,9 @@ export class AuthService {
       },
       auto_select: false,
       cancel_on_tap_outside: false,
-      context: 'signin'
+      context: 'signin',
+      use_fedcm_for_prompt: true,
+      prompt_parent_id: 'google-signin-container'
     });
 
     this.googleInitialized = true;
@@ -110,7 +112,8 @@ export class AuthService {
               // 不要在這裡 reject，因為用戶可能只是暫時跳過
               console.log('Sign-in was skipped');
             } else if (notification.isDismissedMoment()) {
-              reject(new Error('Sign-in was dismissed'));
+              // 不要在這裡 reject，因為用戶可能只是暫時關閉
+              console.log('Sign-in was dismissed');
             }
           });
         } catch (error) {
