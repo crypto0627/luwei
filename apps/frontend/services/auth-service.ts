@@ -78,6 +78,16 @@ export class AuthService {
       ux_mode: 'popup'
     });
 
+    // @ts-ignore
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed()) {
+        console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
+      }
+      if (notification.isSkippedMoment()) {
+        console.warn('One Tap skipped:', notification.getSkippedReason());
+      }
+    });
+
     this.googleInitialized = true;
   }
 
