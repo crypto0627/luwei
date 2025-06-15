@@ -57,6 +57,11 @@ export class AuthService {
 
   async signInWithGoogle() {
     try {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        throw new Error('Google Client ID is not configured');
+      }
+
       // Load the Google OAuth client library
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
@@ -68,7 +73,7 @@ export class AuthService {
         script.onload = () => {
           // @ts-ignore
           google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            client_id: clientId,
             callback: async (response: any) => {
               try {
                 // Send the credential to your backend
