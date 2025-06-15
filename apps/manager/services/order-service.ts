@@ -133,11 +133,11 @@ export class OrderService {
     }
   }
 
-  async completeOrder(orderId: string) {
+  async completeOrder(orderId: string, status: "completed" | "paid" = "completed") {
     try {
       const response = await axios.post(
         `${API_URL}/complete_order`,
-        { orderId },
+        { orderId, status },
         { 
           headers: this.getHeaders(),
           withCredentials: true

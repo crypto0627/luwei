@@ -11,8 +11,10 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await authService.signInWithGoogle();
-      router.push("/");
+      const result = await authService.signInWithGoogle() as { user: { id: string; email: string; name: string } };
+      if (result.user) {
+        router.push("/");
+      }
     } catch (error) {
       console.error("Google 登入失敗:", error);
       alert("Google 登入失敗，請稍後再試。");

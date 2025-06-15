@@ -236,23 +236,23 @@ export const completeOrder = async (c: Context) => {
     }
 
     const body = await c.req.json();
-    const { orderId } = body;
+    const { orderId, status = "completed" } = body;
 
     if (!orderId) {
       return c.json({ error: "Order ID is required" }, 400);
     }
 
-    // Update order status to completed
+    // Update order status
     await db
       .update(orders)
       .set({
-        status: "completed",
+        status,
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
 
     return c.json({
-      message: "Order completed successfully",
+      message: `Order ${status === "paid" ? "marked as paid" : "completed"} successfully`,
       orderId,
     });
   } catch (error) {

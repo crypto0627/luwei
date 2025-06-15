@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import Script from "next/script"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -66,6 +67,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         
         <meta httpEquiv="x-dns-prefetch-control" content="on" />
+        <Script 
+          src="https://accounts.google.com/gsi/client"
+          strategy="afterInteractive"
+          async
+          defer
+        />
       </head>
       <body className={inter.className}>
         <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">{children}</div>

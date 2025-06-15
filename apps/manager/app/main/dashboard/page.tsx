@@ -67,15 +67,15 @@ export default function DashboardPage() {
     fetchOrders()
   }, [fetchOrders])
 
-  const handleOrderAction = async (orderId: string, action: "complete" | "cancel") => {
+  const handleOrderAction = async (orderId: string, action: "complete" | "cancel" | "paid") => {
     const result = await Swal.fire({
-      title: action === "complete" ? "完成訂單" : "取消訂單",
-      text: `確定要${action === "complete" ? "完成" : "取消"}這個訂單嗎？`,
+      title: action === "complete" ? "完成訂單" : action === "paid" ? "標記已付款" : "取消訂單",
+      text: `確定要${action === "complete" ? "完成" : action === "paid" ? "標記為已付款" : "取消"}這個訂單嗎？`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "確定",
       cancelButtonText: "取消",
-      confirmButtonColor: action === "complete" ? "#22c55e" : "#ef4444",
+      confirmButtonColor: action === "complete" ? "#22c55e" : action === "paid" ? "#3b82f6" : "#ef4444",
       cancelButtonColor: "#6b7280",
     })
 
@@ -83,15 +83,17 @@ export default function DashboardPage() {
       try {
         if (action === "complete") {
           await completeOrder(orderId)
+        } else if (action === "paid") {
+          await completeOrder(orderId, "paid")
         } else {
           await deleteOrder(orderId)
         }
         
         await Swal.fire({
           title: "成功",
-          text: `訂單已${action === "complete" ? "完成" : "取消"}`,
+          text: `訂單已${action === "complete" ? "完成" : action === "paid" ? "標記為已付款" : "取消"}`,
           icon: "success",
-          confirmButtonColor: "#22c55e",
+          confirmButtonColor: action === "complete" ? "#22c55e" : action === "paid" ? "#3b82f6" : "#ef4444",
         })
       } catch (error) {
         await Swal.fire({
@@ -265,6 +267,13 @@ export default function DashboardPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="center" className="w-40">
                               <DropdownMenuItem
+                                onClick={() => handleOrderAction(order.id, "paid")}
+                                className="text-blue-600"
+                              >
+                                <DollarSign className="mr-2 h-4 w-4" />
+                                標記已付款
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 onClick={() => handleOrderAction(order.id, "complete")}
                                 className="text-green-600"
                               >
@@ -344,6 +353,13 @@ export default function DashboardPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="center" className="w-40">
                                 <DropdownMenuItem
+                                  onClick={() => handleOrderAction(order.id, "paid")}
+                                  className="text-blue-600"
+                                >
+                                  <DollarSign className="mr-2 h-4 w-4" />
+                                  標記已付款
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
                                   onClick={() => handleOrderAction(order.id, "complete")}
                                   className="text-green-600"
                                 >
@@ -416,6 +432,13 @@ export default function DashboardPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="center" className="w-40">
+                                  <DropdownMenuItem
+                                    onClick={() => handleOrderAction(order.id, "paid")}
+                                    className="text-blue-600"
+                                  >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    標記已付款
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={() => handleOrderAction(order.id, "complete")}
                                     className="text-green-600"

@@ -57,8 +57,44 @@ export class AuthService {
 
   async signInWithGoogle() {
     try {
-      // Redirect to the Google OAuth endpoint
-      window.location.href = `${API_URL}/google`;
+      // Load the Google OAuth client library
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      return new Promise((resolve, reject) => {
+        script.onload = () => {
+          // @ts-ignore
+          google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            callback: async (response: any) => {
+              try {
+                // Send the credential to your backend
+                const result = await axios.post(
+                  `${API_URL}/google/callback`,
+                  { credential: response.credential },
+                  {
+                    headers: this.getHeaders(),
+                    withCredentials: true
+                  }
+                );
+                resolve(result.data);
+              } catch (error) {
+                reject(this.handleError(error));
+              }
+            },
+          });
+
+          // @ts-ignore
+          google.accounts.id.prompt();
+        };
+
+        script.onerror = () => {
+          reject(new Error('Failed to load Google OAuth client library'));
+        };
+      });
     } catch (error) {
       throw this.handleError(error);
     }

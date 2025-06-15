@@ -4,7 +4,7 @@ import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 
 export const logout = async (c: Context) => {
   const token = getCookie(c, "auth_token");
@@ -116,6 +116,86 @@ export const handleGoogleAuth = async (c: Context) => {
     return c.redirect(redirectUrl);
   } catch (error) {
     console.error("Error in Google authentication:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+};
+
+export const handleGoogleCallback = async (c: Context) => {
+  try {
+    const db = getDB(c);
+    const { credential } = await c.req.json();
+
+    if (!credential) {
+      return c.json({ error: "No credential provided" }, 400);
+    }
+
+    // Decode the JWT token without verification
+    const [headerB64, payloadB64] = credential.split('.');
+    const payload = JSON.parse(atob(payloadB64));
+
+    // Verify the token issuer and audience
+    if (payload.iss !== 'https://accounts.google.com' || 
+        payload.aud !== c.env.GOOGLE_ID) {
+      return c.json({ error: "Invalid Google token" }, 401);
+    }
+
+    // Check if token is expired
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      return c.json({ error: "Token expired" }, 401);
+    }
+
+    if (!payload.email || !payload.name) {
+      return c.json({ error: "Invalid Google token payload" }, 401);
+    }
+
+    // Find or create user
+    let existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, payload.email))
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    if (!existingUser) {
+      existingUser = {
+        id: uuidv4(),
+        email: payload.email,
+        name: payload.name,
+        provider: "google",
+        emailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await db.insert(users).values(existingUser);
+    }
+
+    // Generate JWT and set cookie
+    const jwt_token = await sign(
+      {
+        sub: existingUser.id,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 150,
+      },
+      c.env.JWT_SECRET
+    );
+
+    setCookie(c, "auth_token", jwt_token, {
+      httpOnly: true,
+      secure: true,
+      path: "/",
+      sameSite: "none",
+      maxAge: 60 * 60 * 24 * 150,
+    });
+
+    return c.json({ 
+      message: "Login successful",
+      user: {
+        id: existingUser.id,
+        email: existingUser.email,
+        name: existingUser.name
+      }
+    });
+  } catch (error) {
+    console.error("Error in Google callback:", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 };

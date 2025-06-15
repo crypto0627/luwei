@@ -43,7 +43,7 @@ interface OrderStore {
   error: Error | null
   fetchOrders: () => Promise<void>
   deleteOrder: (orderId: string) => Promise<void>
-  completeOrder: (orderId: string) => Promise<void>
+  completeOrder: (orderId: string, status?: "completed" | "paid") => Promise<void>
 }
 
 export const useOrderStore = create<OrderStore>((set) => ({
@@ -78,14 +78,14 @@ export const useOrderStore = create<OrderStore>((set) => ({
     }
   },
 
-  completeOrder: async (orderId: string) => {
+  completeOrder: async (orderId: string, status: "completed" | "paid" = "completed") => {
     set({ isLoading: true, error: null })
     try {
-      await orderService.completeOrder(orderId)
+      await orderService.completeOrder(orderId, status)
       set((state) => ({
         orders: state.orders.map(order => 
           order.id === orderId 
-            ? { ...order, status: 'completed' }
+            ? { ...order, status }
             : order
         ),
         isLoading: false
