@@ -5,13 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import authService from "@/services/auth-service";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function SignInPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on component unmount
+      document.head.removeChild(script);
+    };
+  }, []);
+
   const handleGoogleSignIn = async () => {
     try {
-      const result = await authService.signInWithGoogle() as { user: { id: string; email: string; name: string } };
+      const result = await authService.signInWithGoogle();
       if (result.user) {
         router.push("/");
       }
