@@ -52,6 +52,7 @@ export class OrderService {
     try {
       const response = await axios.post(
         `${API_URL}/monitor`,
+        {},  // empty body
         { 
           headers: this.getHeaders(),
           withCredentials: true

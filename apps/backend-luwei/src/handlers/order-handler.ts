@@ -103,18 +103,7 @@ export const checkout = async (c: Context) => {
 export const getOrders = async (c: Context) => {
   try {
     const db = getDB(c);
-    const token = getCookie(c, "auth_token");
-    if (!token) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-
-    // Verify JWT token and get user ID
-    const payload = await verify(token, c.env.JWT_SECRET);
-    const userId = payload.sub;
-    
-    if (!userId) {
-      return c.json({ error: "Invalid token" }, 401);
-    }
+    const userId = c.get("jwtPayload").sub;
 
     // Get all orders for the user with their items
     const userOrders = await db
@@ -126,7 +115,7 @@ export const getOrders = async (c: Context) => {
       .from(orders)
       .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
       .leftJoin(meals, eq(orderItems.mealId, meals.id))
-      .where(eq(orders.userId, userId as string))
+      .where(eq(orders.userId, userId))
       .orderBy(orders.createdAt);
 
     // Group orders and their items
