@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import authService from "@/services/auth-service";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useUserStore } from "@/stores/useUserStore";
 
 // Add type declaration for Google Identity Services
 declare global {
@@ -36,6 +37,7 @@ declare global {
 export default function SignInPage() {
   const router = useRouter();
   const googleInitialized = useRef(false);
+  const { fetchUser } = useUserStore();
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -60,8 +62,8 @@ export default function SignInPage() {
               try {
                 const result = await authService.handleCredentialResponse(response);
                 if (result && result.user) {
+                  await fetchUser();
                   router.push("/");
-                  router.refresh();
                 }
               } catch (error) {
                 console.error("Google 登入失敗:", error);
@@ -90,7 +92,7 @@ export default function SignInPage() {
       document.head.removeChild(script);
       googleInitialized.current = false;
     };
-  }, [router]);
+  }, [router, fetchUser]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-white flex items-center justify-center p-4">
