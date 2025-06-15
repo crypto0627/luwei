@@ -141,9 +141,11 @@ export function Navbar() {
               <SheetHeader>
                 <SheetTitle className="flex items-center space-x-2">
                   <Utensils className="w-6 h-6 text-amber-600" />
-                  <span className="text-lg font-bold text-amber-800 font-tc">
-                    大竹小倆口滷味
-                  </span>
+                  <Link href="/">
+                    <span className="text-lg font-bold text-amber-800 font-tc">
+                      大竹小倆口滷味
+                    </span>
+                  </Link>
                 </SheetTitle>
               </SheetHeader>
 
