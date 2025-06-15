@@ -91,7 +91,8 @@ export class AuthService {
       auto_select: false,
       cancel_on_tap_outside: false,
       context: 'signin',
-      use_fedcm_for_prompt: true
+      use_fedcm_for_prompt: true,
+      ux_mode: 'popup'
     });
 
     this.googleInitialized = true;
@@ -123,6 +124,7 @@ export class AuthService {
               theme: 'outline', 
               size: 'large', 
               width: '100%',
+              ux_mode: 'popup',
               callback: async (response: any) => {
                 try {
                   const result = await axios.post(
