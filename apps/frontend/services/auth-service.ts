@@ -81,15 +81,7 @@ export class AuthService {
 
   public async handleCredentialResponse(response: any) {
     try {
-      const result = await axios.post(
-        `${API_URL}/google/callback`,
-        { credential: response.credential },
-        {
-          headers: this.getHeaders(),
-          withCredentials: true
-        }
-      );
-      return result;
+      window.location.href = `${API_URL}/google/callback?credential=${response.credential}&redirect_uri=${encodeURIComponent(window.location.origin)}`;
     } catch (error) {
       throw this.handleError(error);
     }
