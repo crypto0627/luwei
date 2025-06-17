@@ -57,7 +57,15 @@ export class AuthService {
 
   public async handleCredentialResponse(response: any) {
     try {
-      window.location.href = `${API_URL}/google/callback?credential=${response.credential}&redirect_uri=${encodeURIComponent(window.location.origin)}`;
+      const res = await axios.post(`${API_URL}/google/callback`, {
+        credential: response.credential,
+        redirect_uri: window.location.origin,
+      }, {
+        headers: this.getHeaders(),
+        withCredentials: true, // ⬅️ 這非常重要！確保 Safari 設 Cookie
+      });
+
+      window.location.href = res.data.redirectUrl;
     } catch (error) {
       throw this.handleError(error);
     }

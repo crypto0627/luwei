@@ -1,19 +1,11 @@
-import { Env, Hono } from "hono";
+import { Hono } from "hono";
 import { apiKeyAuth, jwtAuthMiddleware } from "../middleware/auth";
 import { logout, me, handleGoogleCallback } from "../handlers/auth-handler";
-import { googleAuth } from "@hono/oauth-providers/google";
-import { setCookie } from "hono/cookie";
 
 const router = new Hono<{ Bindings: CloudflareBindings }>();
 
 router.post("/logout", apiKeyAuth, logout);
 router.get("/me", apiKeyAuth, jwtAuthMiddleware, me);
-
-const googleAuthWithEnv = (env: CloudflareBindings) => googleAuth({
-  client_id: env.GOOGLE_ID,
-  client_secret: env.GOOGLE_SECRET,
-  scope: ["openid", "email", "profile"],
-});
 
 // router.use("/google", (c, next) => {
 //   const redirectUri = c.req.query("redirect_uri");
@@ -33,6 +25,6 @@ const googleAuthWithEnv = (env: CloudflareBindings) => googleAuth({
 // router.get("/google", handleGoogleAuth);
 
 // New endpoint to handle Google OAuth callback
-router.get("/google/callback", handleGoogleCallback);
+router.post("/google/callback", handleGoogleCallback);
 
 export default router;

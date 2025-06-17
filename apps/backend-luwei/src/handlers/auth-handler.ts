@@ -4,7 +4,7 @@ import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 
 export const logout = async (c: Context) => {
   const token = getCookie(c, "auth_token");
@@ -48,86 +48,10 @@ export const me = async (c: Context) => {
   }
 };
 
-// export const handleGoogleAuth = async (c: Context) => {
-//   try {
-//     const db = getDB(c);
-//     const user = c.get("user-google");
-
-//     if (!user || !user.email || !user.name) {
-//       return c.json({ error: "Google authentication failed" }, 401);
-//     }
-
-//     // 讀取 redirect_uri 並導回
-//     const redirectUri = getCookie(c, "redirect_uri");
-//     const fallback = "https://luwei.pages.dev";
-    
-//     console.log("Raw redirectUri:", redirectUri);
-    
-//     if (!redirectUri) {
-//       console.log("No redirectUri provided, using fallback");
-//       return c.redirect(fallback);
-//     }
-
-//     // 根據不同環境決定重定向目標
-//     const redirectUrl = getRedirectUrl(redirectUri);
-//     console.log("Final redirectUrl:", redirectUrl);
-    
-//     if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && user.email !=="jake0627a1@gmail.com") {
-//       return c.json({error: "You don't have permission.You are not manager!"}, 402)
-//     }
-
-//     // 找或創建使用者
-//     let existingUser = await db
-//       .select()
-//       .from(users)
-//       .where(eq(users.email, user.email))
-//       .limit(1)
-//       .then((rows) => rows[0]);
-
-//     if (!existingUser) {
-//       existingUser = {
-//         id: uuidv4(),
-//         email: user.email,
-//         name: user.name,
-//         provider: "google",
-//         emailVerified: true,
-//         createdAt: new Date(),
-//         updatedAt: new Date(),
-//       };
-//       await db.insert(users).values(existingUser);
-//     }
-
-//     // 產生 JWT 並設 cookie
-//     const jwt_token = await sign(
-//       {
-//         sub: existingUser.id,
-//         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 150,
-//       },
-//       c.env.JWT_SECRET
-//     );
-
-//     setCookie(c, "auth_token", jwt_token, {
-//       httpOnly: true,
-//       secure: true,
-//       path: "/",
-//       sameSite: "none",
-//       maxAge: 60 * 60 * 24 * 150,
-//     });
-  
-//     // 清除 state
-//     setCookie(c, "state", "", { path: "/", maxAge: 0 });
-
-//     return c.redirect(redirectUrl);
-//   } catch (error) {
-//     console.error("Error in Google authentication:", error);
-//     return c.json({ error: "Internal server error" }, 500);
-//   }
-// };
 export const handleGoogleCallback = async (c: Context) => {
   try {
     const db = getDB(c);
-    const credential = c.req.query('credential');
-    const redirectUri = c.req.query('redirect_uri');
+    const { credential, redirect_uri } = await c.req.json();
 
     if (!credential) {
       return c.json({ error: "No credential provided" }, 400);
@@ -156,11 +80,11 @@ export const handleGoogleCallback = async (c: Context) => {
     const fallback = "https://luwei.pages.dev";
     let redirectUrl = fallback;
     
-    if (redirectUri) {
-      redirectUrl = getRedirectUrl(redirectUri);
+    if (redirect_uri) {
+      redirectUrl = getRedirectUrl(redirect_uri);
       console.log("Final redirectUrl:", redirectUrl);
       
-      if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
+      if (redirect_uri === "https://luwei-manager.pages.dev/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
         return c.json({error: "You don't have permission.You are not manager!"}, 402);
       }
     }
@@ -195,15 +119,18 @@ export const handleGoogleCallback = async (c: Context) => {
       c.env.JWT_SECRET
     );
 
+    const redirectUrlObj = new URL(redirectUrl);
+    
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,
       secure: true,
       path: "/",
       sameSite: "none",
       maxAge: 60 * 60 * 24 * 150,
+      domain: redirectUrlObj.hostname
     });
 
-    return c.redirect(redirectUrl);
+    return c.json({ token: jwt_token, redirectUrl });
   } catch (error) {
     console.error("Error in Google callback:", error);
     return c.json({ error: "Internal server error" }, 500);
