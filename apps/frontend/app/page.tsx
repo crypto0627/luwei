@@ -1,11 +1,21 @@
+"use client";
+
 import { HeroSection } from "@/components/hero-section";
 import { MealCard } from "@/components/meal-card";
 import { ShoppingCartPreview } from "@/components/shopping-cart";
 import { AIChatbot } from "@/components/ai-chatbot";
 import { sampleMeals } from "@/lib/data";
 import { Menu } from "@/components/menu";
+import { useEffect } from "react";
+import { useUserStore } from "@/stores/useUserStore";
 
 export default function HomePage() {
+  const { fetchUser } = useUserStore();
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-400 via-orange-200 to-white">
       {/* Hero Section */}

@@ -1,7 +1,7 @@
 import { cors } from "hono/cors";
 
 export const corsMiddleware = cors({
-  origin: ["https://luwei-manager.pages.dev", "https://luwei.pages.dev"],
+  origin: ["https://luwei-manager.pages.dev", "https://luwei.pages.dev", "http://localhost:3000"],
   allowMethods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
   credentials: true,
   allowHeaders: ["Content-Type", "Authorization", "X-API-Key"],

@@ -36,6 +36,7 @@ export default function HomePage() {
   const router = useRouter()
   const { user, isLoading, fetchUser } = useUserStore()
   const googleInitialized = useRef(false)
+  const googleSignInContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,57 +50,48 @@ export default function HomePage() {
   }, [router, user, fetchUser])
 
   useEffect(() => {
-    // Load Google Identity Services script
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+    let interval: NodeJS.Timeout;
 
-    // Initialize Google Sign-In when script is loaded
-    const initializeGoogle = () => {
-      if (googleInitialized.current) return;
-      
-      const interval = setInterval(() => {
-        if (window.google) {
-          clearInterval(interval);
-          googleInitialized.current = true;
-          
-          window.google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-            callback: async (response: any) => {
-              try {
-                const result = await authService.handleCredentialResponse(response);
-                if (result && result.user) {
-                  await fetchUser();
-                  router.push("/main/dashboard");
-                }
-              } catch (error) {
-                console.error("Google 登入失敗:", error);
-                alert("Google 登入失敗，請稍後再試。");
+    const tryRenderGoogleButton = () => {
+      // 確保 Google Identity Services 已加載，容器 ref 可用，且尚未初始化
+      if (window.google && googleSignInContainerRef.current && !googleInitialized.current) {
+        clearInterval(interval); // 條件滿足後停止檢查
+        googleInitialized.current = true; // 標記為已初始化
+
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+          callback: async (response: any) => {
+            try {
+              const result = await authService.handleCredentialResponse(response);
+              if (result && result.user) {
+                await fetchUser();
+                router.push("/main/dashboard");
               }
-            },
-            ux_mode: 'popup'
-          });
-
-          window.google.accounts.id.renderButton(
-            document.getElementById('google-signin-container'),
-            { 
-              type: 'standard', 
-              theme: 'outline', 
-              size: 'large',
-              width: '100%'
+            } catch (error) {
+              console.error("Google 登入失敗:", error);
+              alert("Google 登入失敗，請稍後再試。");
             }
-          );
-        }
-      }, 100);
+          },
+          ux_mode: 'popup'
+        });
+
+        window.google.accounts.id.renderButton(
+          googleSignInContainerRef.current,
+          { 
+            type: 'standard', 
+            theme: 'outline', 
+            size: 'large',
+            width: '100%'
+          }
+        );
+      }
     };
 
-    script.onload = initializeGoogle;
+    // 每 100ms 開始檢查 window.google 和 ref 的可用性
+    interval = setInterval(tryRenderGoogleButton, 100);
 
     return () => {
-      document.head.removeChild(script);
-      googleInitialized.current = false;
+      clearInterval(interval); // 在組件卸載時清除 interval
     };
   }, [router, fetchUser]);
 
@@ -127,7 +119,7 @@ export default function HomePage() {
             </div>
           </div>
           <CardContent className="p-6 pt-0 space-y-4">
-            <div id="google-signin-container" className="w-full">
+            <div ref={googleSignInContainerRef} className="w-full">
               {/* Google Sign-In button will be rendered here */}
             </div>
           </CardContent>

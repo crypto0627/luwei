@@ -57,6 +57,25 @@ export const handleGoogleAuth = async (c: Context) => {
       return c.json({ error: "Google authentication failed" }, 401);
     }
 
+    // 讀取 redirect_uri 並導回
+    const redirectUri = getCookie(c, "redirect_uri");
+    const fallback = "https://luwei.pages.dev";
+    
+    console.log("Raw redirectUri:", redirectUri);
+    
+    if (!redirectUri) {
+      console.log("No redirectUri provided, using fallback");
+      return c.redirect(fallback);
+    }
+
+    // 根據不同環境決定重定向目標
+    const redirectUrl = getRedirectUrl(redirectUri);
+    console.log("Final redirectUrl:", redirectUrl);
+    
+    if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && user.email !=="jake0627a1@gmail.com") {
+      return c.json({error: "You don't have permission.You are not manager!"}, 402)
+    }
+
     // 找或創建使用者
     let existingUser = await db
       .select()
@@ -98,21 +117,6 @@ export const handleGoogleAuth = async (c: Context) => {
     // 清除 state
     setCookie(c, "state", "", { path: "/", maxAge: 0 });
 
-    // 讀取 redirect_uri 並導回
-    const redirectUri = getCookie(c, "redirect_uri");
-    const fallback = "https://luwei.pages.dev";
-    
-    console.log("Raw redirectUri:", redirectUri);
-    
-    if (!redirectUri) {
-      console.log("No redirectUri provided, using fallback");
-      return c.redirect(fallback);
-    }
-
-    // 根據不同環境決定重定向目標
-    const redirectUrl = getRedirectUrl(redirectUri);
-    console.log("Final redirectUrl:", redirectUrl);
-    
     return c.redirect(redirectUrl);
   } catch (error) {
     console.error("Error in Google authentication:", error);
@@ -123,7 +127,7 @@ export const handleGoogleAuth = async (c: Context) => {
 export const handleGoogleCallback = async (c: Context) => {
   try {
     const db = getDB(c);
-    const { credential } = await c.req.json();
+    const { credential, redirectUri } = await c.req.json();
 
     if (!credential) {
       return c.json({ error: "No credential provided" }, 400);
@@ -146,6 +150,19 @@ export const handleGoogleCallback = async (c: Context) => {
 
     if (!payload.email || !payload.name) {
       return c.json({ error: "Invalid Google token payload" }, 401);
+    }
+
+    // 根據不同環境決定重定向目標
+    const fallback = "https://luwei.pages.dev";
+    let redirectUrl = fallback;
+    
+    if (redirectUri) {
+      redirectUrl = getRedirectUrl(redirectUri);
+      console.log("Final redirectUrl:", redirectUrl);
+      
+      if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
+        return c.json({error: "You don't have permission.You are not manager!"}, 402);
+      }
     }
 
     // Find or create user
@@ -186,14 +203,7 @@ export const handleGoogleCallback = async (c: Context) => {
       maxAge: 60 * 60 * 24 * 150,
     });
 
-    return c.json({ 
-      message: "Login successful",
-      user: {
-        id: existingUser.id,
-        email: existingUser.email,
-        name: existingUser.name
-      }
-    });
+    return c.redirect(redirectUrl);
   } catch (error) {
     console.error("Error in Google callback:", error);
     return c.json({ error: "Internal server error" }, 500);

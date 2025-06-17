@@ -60,11 +60,7 @@ export default function SignInPage() {
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
             callback: async (response: any) => {
               try {
-                const result = await authService.handleCredentialResponse(response);
-                if (result && result.user) {
-                  await fetchUser();
-                  router.push("/");
-                }
+                await authService.handleCredentialResponse(response);
               } catch (error) {
                 console.error("Google 登入失敗:", error);
                 alert("Google 登入失敗，請稍後再試。");

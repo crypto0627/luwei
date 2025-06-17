@@ -89,7 +89,7 @@ export class AuthService {
           withCredentials: true
         }
       );
-      return result.data;
+      return result;
     } catch (error) {
       throw this.handleError(error);
     }
