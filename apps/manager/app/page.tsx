@@ -50,48 +50,53 @@ export default function HomePage() {
   }, [router, user, fetchUser])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
 
-    const tryRenderGoogleButton = () => {
-      // 確保 Google Identity Services 已加載，容器 ref 可用，且尚未初始化
-      if (window.google && googleSignInContainerRef.current && !googleInitialized.current) {
-        clearInterval(interval); // 條件滿足後停止檢查
-        googleInitialized.current = true; // 標記為已初始化
-
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-          callback: async (response: any) => {
-            try {
-              const result = await authService.handleCredentialResponse(response);
-              if (result && result.user) {
-                await fetchUser();
-                router.push("/main/dashboard");
+    // Initialize Google Sign-In when script is loaded
+    const initializeGoogle = () => {
+      if (googleInitialized.current) return;
+      
+      const interval = setInterval(() => {
+        if (window.google) {
+          clearInterval(interval);
+          googleInitialized.current = true;
+          
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+            callback: async (response: any) => {
+              try {
+                await authService.handleCredentialResponse(response);
+              } catch (error) {
+                console.error("Google 登入失敗:", error);
+                alert("Google 登入失敗，請稍後再試。");
               }
-            } catch (error) {
-              console.error("Google 登入失敗:", error);
-              alert("Google 登入失敗，請稍後再試。");
-            }
-          },
-          ux_mode: 'popup'
-        });
+            },
+            ux_mode: 'popup'
+          });
 
-        window.google.accounts.id.renderButton(
-          googleSignInContainerRef.current,
-          { 
-            type: 'standard', 
-            theme: 'outline', 
-            size: 'large',
-            width: '100%'
-          }
-        );
-      }
+          window.google.accounts.id.renderButton(
+            document.getElementById('google-signin-container'),
+            { 
+              type: 'standard', 
+              theme: 'outline', 
+              size: 'large',
+              width: '100%'
+            }
+          );
+        }
+      }, 100);
     };
 
-    // 每 100ms 開始檢查 window.google 和 ref 的可用性
-    interval = setInterval(tryRenderGoogleButton, 100);
+    script.onload = initializeGoogle;
 
     return () => {
-      clearInterval(interval); // 在組件卸載時清除 interval
+      document.head.removeChild(script);
+      googleInitialized.current = false;
     };
   }, [router, fetchUser]);
 

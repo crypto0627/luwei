@@ -33,6 +33,6 @@ const googleAuthWithEnv = (env: CloudflareBindings) => googleAuth({
 // router.get("/google", handleGoogleAuth);
 
 // New endpoint to handle Google OAuth callback
-router.post("/google/callback", apiKeyAuth, handleGoogleCallback);
+router.get("/google/callback", handleGoogleCallback);
 
 export default router;

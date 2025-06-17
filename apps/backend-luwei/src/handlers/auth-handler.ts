@@ -48,86 +48,86 @@ export const me = async (c: Context) => {
   }
 };
 
-export const handleGoogleAuth = async (c: Context) => {
-  try {
-    const db = getDB(c);
-    const user = c.get("user-google");
+// export const handleGoogleAuth = async (c: Context) => {
+//   try {
+//     const db = getDB(c);
+//     const user = c.get("user-google");
 
-    if (!user || !user.email || !user.name) {
-      return c.json({ error: "Google authentication failed" }, 401);
-    }
+//     if (!user || !user.email || !user.name) {
+//       return c.json({ error: "Google authentication failed" }, 401);
+//     }
 
-    // 讀取 redirect_uri 並導回
-    const redirectUri = getCookie(c, "redirect_uri");
-    const fallback = "https://luwei.pages.dev";
+//     // 讀取 redirect_uri 並導回
+//     const redirectUri = getCookie(c, "redirect_uri");
+//     const fallback = "https://luwei.pages.dev";
     
-    console.log("Raw redirectUri:", redirectUri);
+//     console.log("Raw redirectUri:", redirectUri);
     
-    if (!redirectUri) {
-      console.log("No redirectUri provided, using fallback");
-      return c.redirect(fallback);
-    }
+//     if (!redirectUri) {
+//       console.log("No redirectUri provided, using fallback");
+//       return c.redirect(fallback);
+//     }
 
-    // 根據不同環境決定重定向目標
-    const redirectUrl = getRedirectUrl(redirectUri);
-    console.log("Final redirectUrl:", redirectUrl);
+//     // 根據不同環境決定重定向目標
+//     const redirectUrl = getRedirectUrl(redirectUri);
+//     console.log("Final redirectUrl:", redirectUrl);
     
-    if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && user.email !=="jake0627a1@gmail.com") {
-      return c.json({error: "You don't have permission.You are not manager!"}, 402)
-    }
+//     if (redirectUri === "https://luwei-manager.pages.dev/main/dashboard" && user.email !=="jake0627a1@gmail.com") {
+//       return c.json({error: "You don't have permission.You are not manager!"}, 402)
+//     }
 
-    // 找或創建使用者
-    let existingUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, user.email))
-      .limit(1)
-      .then((rows) => rows[0]);
+//     // 找或創建使用者
+//     let existingUser = await db
+//       .select()
+//       .from(users)
+//       .where(eq(users.email, user.email))
+//       .limit(1)
+//       .then((rows) => rows[0]);
 
-    if (!existingUser) {
-      existingUser = {
-        id: uuidv4(),
-        email: user.email,
-        name: user.name,
-        provider: "google",
-        emailVerified: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      await db.insert(users).values(existingUser);
-    }
+//     if (!existingUser) {
+//       existingUser = {
+//         id: uuidv4(),
+//         email: user.email,
+//         name: user.name,
+//         provider: "google",
+//         emailVerified: true,
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       };
+//       await db.insert(users).values(existingUser);
+//     }
 
-    // 產生 JWT 並設 cookie
-    const jwt_token = await sign(
-      {
-        sub: existingUser.id,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 150,
-      },
-      c.env.JWT_SECRET
-    );
+//     // 產生 JWT 並設 cookie
+//     const jwt_token = await sign(
+//       {
+//         sub: existingUser.id,
+//         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 150,
+//       },
+//       c.env.JWT_SECRET
+//     );
 
-    setCookie(c, "auth_token", jwt_token, {
-      httpOnly: true,
-      secure: true,
-      path: "/",
-      sameSite: "none",
-      maxAge: 60 * 60 * 24 * 150,
-    });
+//     setCookie(c, "auth_token", jwt_token, {
+//       httpOnly: true,
+//       secure: true,
+//       path: "/",
+//       sameSite: "none",
+//       maxAge: 60 * 60 * 24 * 150,
+//     });
   
-    // 清除 state
-    setCookie(c, "state", "", { path: "/", maxAge: 0 });
+//     // 清除 state
+//     setCookie(c, "state", "", { path: "/", maxAge: 0 });
 
-    return c.redirect(redirectUrl);
-  } catch (error) {
-    console.error("Error in Google authentication:", error);
-    return c.json({ error: "Internal server error" }, 500);
-  }
-};
-
+//     return c.redirect(redirectUrl);
+//   } catch (error) {
+//     console.error("Error in Google authentication:", error);
+//     return c.json({ error: "Internal server error" }, 500);
+//   }
+// };
 export const handleGoogleCallback = async (c: Context) => {
   try {
     const db = getDB(c);
-    const { credential, redirectUri } = await c.req.json();
+    const credential = c.req.query('credential');
+    const redirectUri = c.req.query('redirect_uri');
 
     if (!credential) {
       return c.json({ error: "No credential provided" }, 400);
