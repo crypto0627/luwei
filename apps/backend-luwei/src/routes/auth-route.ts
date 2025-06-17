@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { apiKeyAuth, jwtAuthMiddleware } from "../middleware/auth";
-import { logout, me, handleGoogleCallback } from "../handlers/auth-handler";
+import { logout, me, handleGoogleCallback, setCookieSafari } from "../handlers/auth-handler";
 
 const router = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -26,5 +26,5 @@ router.get("/me", apiKeyAuth, jwtAuthMiddleware, me);
 
 // New endpoint to handle Google OAuth callback
 router.post("/google/callback", handleGoogleCallback);
-
+router.post("/set-cookie", apiKeyAuth, setCookieSafari)
 export default router;

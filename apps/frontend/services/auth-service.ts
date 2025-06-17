@@ -64,8 +64,15 @@ export class AuthService {
         headers: this.getHeaders(),
         withCredentials: true, // ⬅️ 這非常重要！確保 Safari 設 Cookie
       });
-
-      window.location.href = res.data.redirectUrl;
+      const cookie_res = await axios.post(`${API_URL}/set-cookie`, { token: res.data.token }, {
+        withCredentials: true,
+        headers: { "X-API-Key": this.apiKey },
+      });
+      if (cookie_res.data.message === "Cookie set") {
+        window.location.href = res.data.redirectUrl;
+      } else {
+        throw new Error("Failed to set cookie");
+      }
     } catch (error) {
       throw this.handleError(error);
     }

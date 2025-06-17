@@ -12,9 +12,9 @@ export const logout = async (c: Context) => {
 
   await deleteCookie(c, "auth_token", {
     httpOnly: true,
-    secure: true,
+    secure: false,
     path: "/",
-    sameSite: "none",
+    sameSite: "lax",
   });
 
   return c.json({ message: "已登出" });
@@ -123,11 +123,10 @@ export const handleGoogleCallback = async (c: Context) => {
     
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       path: "/",
-      sameSite: "none",
-      maxAge: 60 * 60 * 24 * 150,
-      domain: redirectUrlObj.hostname
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 150
     });
 
     return c.json({ token: jwt_token, redirectUrl });
@@ -159,3 +158,16 @@ function getRedirectUrl(uri: string): string {
     return "https://luwei.pages.dev/main/dashboard";
   }
 }
+
+export const setCookieSafari = async(c: Context) => {
+  const body = await c.req.json();
+  const token = body.token;
+  setCookie(c, "auth_token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 150,
+  });
+  return c.json({ message: "Cookie set" }, 201);
+};
