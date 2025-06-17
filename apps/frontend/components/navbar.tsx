@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -137,7 +138,11 @@ export function Navbar() {
                 <Menu className="w-6 h-6 text-amber-700" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-[425px]">
+            <SheetContent 
+              side="right" 
+              className="w-full sm:max-w-[425px]"
+              aria-describedby="mobile-menu-description"
+            >
               <SheetHeader>
                 <SheetTitle className="flex items-center space-x-2">
                   <Utensils className="w-6 h-6 text-amber-600" />
@@ -147,6 +152,9 @@ export function Navbar() {
                     </span>
                   </Link>
                 </SheetTitle>
+                <SheetDescription id="mobile-menu-description" className="sr-only">
+                  行動裝置選單
+                </SheetDescription>
               </SheetHeader>
 
               <div className="mt-8 space-y-4">
