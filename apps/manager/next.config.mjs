@@ -10,6 +10,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    formats: ['image/webp'],
   },
   output: "export",
   async headers() {
