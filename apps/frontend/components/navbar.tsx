@@ -53,7 +53,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[#f2c147]/20 group-hover:border-[#f2c147]/40 transition-colors duration-300">
               <Image
-                src="/images/logo.jpg"
+                src="/images/logo.webp"
                 alt="新鮮市場廚房"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -146,7 +146,7 @@ export function Navbar() {
               <SheetHeader>
                 <SheetTitle className="flex items-center space-x-2">
                   <Utensils className="w-6 h-6 text-amber-600" />
-                  <Link href="/">
+                  <Link href="/" onClick={()=>setIsOpen(false)}>
                     <span className="text-lg font-bold text-amber-800 font-tc">
                       大竹小倆口滷味
                     </span>

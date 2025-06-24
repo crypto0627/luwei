@@ -3,7 +3,6 @@
 import { HeroSection } from "@/components/hero-section";
 import { MealCard } from "@/components/meal-card";
 import { ShoppingCartPreview } from "@/components/shopping-cart";
-import { AIChatbot } from "@/components/ai-chatbot";
 import { sampleMeals } from "@/lib/data";
 import { Menu } from "@/components/menu";
 
@@ -42,9 +41,6 @@ export default function HomePage() {
 
       {/* Shopping Cart */}
       <ShoppingCartPreview />
-
-      {/* AI Chatbot */}
-      <AIChatbot />
     </div>
   );
 }

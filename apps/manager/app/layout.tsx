@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description: "純手工無添加防腐劑，週一至週五下訂，隔週一即可取貨",
   manifest: "/manifest.json",
   icons: {
-    icon: "/images/logo.jpg",
+    icon: "/images/logo.webp",
     apple: [
       { url: "/ios/180.png", sizes: "180x180", type: "image/png" }
     ],

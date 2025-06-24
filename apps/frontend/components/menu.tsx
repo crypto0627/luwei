@@ -20,7 +20,7 @@ export function Menu() {
         <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
           <div className="relative aspect-[3/4] overflow-hidden md:w-1/2">
             <Image
-              src="/images/menu.jpg"
+              src="/images/menu.webp"
               alt="大竹小倆口滷味菜單"
               fill
               className="object-contain rounded-2xl border-4 border-white bg-white/70"
