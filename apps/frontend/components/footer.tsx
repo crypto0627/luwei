@@ -62,13 +62,8 @@ export function Footer() {
             <h3 className="text-xl font-bold mb-4 text-orange-300">追蹤我們</h3>
             <div className="flex space-x-4">
               <a
-                href="#"
-                className="bg-amber-700 p-3 rounded-full hover:bg-amber-600 transition-colors"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
+                href="https://www.instagram.com/slao_llang_kou?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
                 className="bg-amber-700 p-3 rounded-full hover:bg-amber-600 transition-colors"
               >
                 <Instagram className="w-5 h-5" />

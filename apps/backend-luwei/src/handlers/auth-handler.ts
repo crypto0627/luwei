@@ -84,7 +84,7 @@ export const handleGoogleCallback = async (c: Context) => {
       redirectUrl = getRedirectUrl(redirect_uri);
       console.log("Final redirectUrl:", redirectUrl);
       
-      if (redirect_uri === "https://www.manager.xiaoliangkouluwei.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
+      if (redirect_uri === "https://manager.xiaoliangkouluwei.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
         return c.json({error: "You don't have permission.You are not manager!"}, 402);
       }
     }
@@ -139,8 +139,8 @@ function getRedirectUrl(uri: string): string {
     const url = new URL(uri);
     const hostname = url.hostname;
     
-    if (hostname === "www.manager.xiaoliangkouluwei.com") {
-      return "https://www.manager.xiaoliangkouluwei.com/main/dashboard";
+    if (hostname === "manager.xiaoliangkouluwei.com") {
+      return "https://manager.xiaoliangkouluwei.com/main/dashboard";
     }
     
     if (hostname === "www.xiaoliangkouluwei.com") {

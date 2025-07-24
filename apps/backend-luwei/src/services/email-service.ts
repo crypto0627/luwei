@@ -167,7 +167,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">滷</div>
+              <img class="logo" src="https://xiaoliangkouluwei.com/logo.webp" alt="大竹小倆口滷味 Logo" style="width: 48px; height: 48px; border-radius: 50%;" />
               <h1 class="title">大竹小倆口滷味</h1>
               <p class="subtitle">訂單確認通知</p>
             </div>
@@ -201,7 +201,7 @@ export class EmailService {
             <div class="contact-info">
               <h3>重要提醒</h3>
               <p>• 週一至週五下訂，隔週一即可取貨</p>
-              <p>• 取貨時間：週一 10:00–14:00 16:30–19:00</p>
+              <p>• 取貨時間： 週一至週六 10:00–14:00 16:30–19:00</p>
               <p>• 取貨地點：大竹小倆口滷味店面</p>
               <p>• 如有任何問題，請聯繫我們</p>
             </div>
