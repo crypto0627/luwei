@@ -118,8 +118,6 @@ export const handleGoogleCallback = async (c: Context) => {
       },
       c.env.JWT_SECRET
     );
-
-    const redirectUrlObj = new URL(redirectUrl);
     
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,

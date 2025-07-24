@@ -74,15 +74,14 @@ export function Navbar() {
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
                   target={item.target}
-                  className="relative text-amber-700 hover:text-amber-900 font-medium transition-colors duration-300 group py-2 font-tc"
+                  className="relative text-amber-700 hover:text-amber-900 font-medium transition-colors duration-300 group py-2 font-tc underline-anim"
                 >
                   {item.name}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-600 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -159,15 +158,15 @@ export function Navbar() {
 
               <div className="mt-8 space-y-4">
                 {navItems.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
                     href={item.href}
                     target={item.target}
-                    className="block py-3 px-4 text-amber-700 hover:bg-amber-50 rounded-lg transition-all duration-300 hover:translate-x-2 font-tc"
+                    className="block py-3 px-4 text-amber-700 hover:bg-amber-50 rounded-lg transition-all duration-300 hover:translate-x-2 font-tc underline-anim"
                     onClick={() => setIsOpen(false)}
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
                 <div className="pt-4 border-t border-amber-200 space-y-3">
                   {user ? (

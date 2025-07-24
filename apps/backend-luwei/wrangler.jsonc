@@ -42,6 +42,12 @@
 	/**
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 * 
+	 * Required secrets:
+	 * - RESEND_API_KEY: Your Resend API key for sending emails
+	 * 
+	 * To set secrets, run:
+	 * wrangler secret put RESEND_API_KEY
 	 */
 
 	/**

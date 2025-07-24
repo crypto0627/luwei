@@ -93,3 +93,60 @@
 .logo-carousel-track:hover {
   animation-play-state: paused;
 }
+
+/* 精緻的 underline 動畫 (更細緻) */
+@keyframes underline-in {
+  from {
+    transform: scaleX(0);
+    opacity: 0.5;
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+    transform-origin: left;
+  }
+}
+
+@keyframes underline-out {
+  from {
+    transform: scaleX(1);
+    opacity: 1;
+    transform-origin: right;
+  }
+  to {
+    transform: scaleX(0);
+    opacity: 0.5;
+    transform-origin: right;
+  }
+}
+
+.underline-anim {
+  position: relative;
+  overflow: visible;
+}
+.underline-anim::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2.5px;
+  width: 100%;
+  background: var(--accent-gradient, currentColor);
+  border-radius: 2px;
+  transform: scaleX(0);
+  opacity: 0.5;
+  transform-origin: left;
+  animation-fill-mode: forwards;
+  transition: none;
+  pointer-events: none;
+}
+
+.underline-anim:hover::after,
+.underline-anim:focus-visible::after {
+  animation: underline-in 0.32s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+.underline-anim:not(:hover):not(:focus-visible)::after {
+  animation: underline-out 0.28s cubic-bezier(.4,0,.2,1) forwards;
+}

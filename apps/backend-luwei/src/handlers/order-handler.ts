@@ -5,6 +5,7 @@ import { eq, inArray } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
+import { EmailService } from "../services/email-service";
 
 export const checkout = async (c: Context) => {
   try {
@@ -88,6 +89,20 @@ export const checkout = async (c: Context) => {
     }));
 
     await db.insert(orderItems).values(orderItemsData);
+
+    // Send order confirmation email
+    try {
+      const emailService = EmailService.getInstance(c.env.RESEND_API_KEY);
+      await emailService.sendOrderConfirmationEmail(
+        user.email,
+        user.name,
+        orderId,
+        items,
+        totalAmount
+      );
+    } catch (emailError) {
+      console.error("Failed to send order confirmation email:", emailError);
+    }
 
     return c.json({
       message: "訂單建立成功",
@@ -200,12 +215,30 @@ export const deleteOrder = async (c: Context) => {
     if (!token) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+    const payload = await verify(token, c.env.JWT_SECRET);
+    const userId = payload.sub;
 
     const body = await c.req.json();
     const { orderId } = body;
 
     if (!orderId) {
       return c.json({ error: "Order ID is required" }, 400);
+    }
+
+    // First, find the user associated with the order to get their email and name
+    const orderData = await db
+      .select({
+        userEmail: users.email,
+        userName: users.name,
+      })
+      .from(orders)
+      .leftJoin(users, eq(orders.userId, users.id))
+      .where(eq(orders.id, orderId))
+      .limit(1)
+      .then(rows => rows[0]);
+
+    if (!orderData || !orderData.userEmail || !orderData.userName) {
+      return c.json({ error: "Order or user data not found" }, 404);
     }
 
     // Update order status to cancelled
@@ -216,6 +249,19 @@ export const deleteOrder = async (c: Context) => {
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
+
+    // Send status update email
+    try {
+      const emailService = EmailService.getInstance(c.env.RESEND_API_KEY);
+      await emailService.sendOrderStatusUpdateEmail(
+        orderData.userEmail,
+        orderData.userName,
+        orderId,
+        "cancelled"
+      );
+    } catch (emailError) {
+      console.error("Failed to send order cancellation email:", emailError);
+    }
 
     return c.json({
       message: "Order cancelled successfully",
@@ -241,6 +287,26 @@ export const completeOrder = async (c: Context) => {
     if (!orderId) {
       return c.json({ error: "Order ID is required" }, 400);
     }
+    
+    if (status !== 'completed' && status !== 'paid') {
+      return c.json({ error: "Invalid status provided" }, 400);
+    }
+
+    // Find user associated with the order for the email
+    const orderData = await db
+      .select({
+        userEmail: users.email,
+        userName: users.name,
+      })
+      .from(orders)
+      .leftJoin(users, eq(orders.userId, users.id))
+      .where(eq(orders.id, orderId))
+      .limit(1)
+      .then(rows => rows[0]);
+
+    if (!orderData || !orderData.userEmail || !orderData.userName) {
+      return c.json({ error: "Order or user data not found" }, 404);
+    }
 
     // Update order status
     await db
@@ -250,6 +316,19 @@ export const completeOrder = async (c: Context) => {
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
+
+    // Send status update email
+    try {
+      const emailService = EmailService.getInstance(c.env.RESEND_API_KEY);
+      await emailService.sendOrderStatusUpdateEmail(
+        orderData.userEmail,
+        orderData.userName,
+        orderId,
+        status
+      );
+    } catch (emailError) {
+      console.error(`Failed to send order ${status} email:`, emailError);
+    }
 
     return c.json({
       message: `Order ${status === "paid" ? "marked as paid" : "completed"} successfully`,

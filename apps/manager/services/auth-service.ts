@@ -5,8 +5,6 @@ const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth`
 export class AuthService {
   private static instance: AuthService;
   private apiKey: string;
-  private googleInitialized: boolean = false;
-
   private constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_X_API_KEY || "";
   }
