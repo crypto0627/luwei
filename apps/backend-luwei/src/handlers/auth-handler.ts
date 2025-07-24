@@ -77,14 +77,14 @@ export const handleGoogleCallback = async (c: Context) => {
     }
 
     // 根據不同環境決定重定向目標
-    const fallback = "https://www.luwei.xincheng-brunch.com";
+    const fallback = "https://www.xiaoliangkouluwei.com";
     let redirectUrl = fallback;
     
     if (redirect_uri) {
       redirectUrl = getRedirectUrl(redirect_uri);
       console.log("Final redirectUrl:", redirectUrl);
       
-      if (redirect_uri === "https://www.luwei-manager.xincheng-brunch.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
+      if (redirect_uri === "https://www.manager.xiaoliangkouluwei.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
         return c.json({error: "You don't have permission.You are not manager!"}, 402);
       }
     }
@@ -139,21 +139,19 @@ function getRedirectUrl(uri: string): string {
     const url = new URL(uri);
     const hostname = url.hostname;
     
-    // 開發環境
-    if (hostname === "www.luwei-manager.xincheng-brunch.com") {
-      return "https://www.luwei-manager.xincheng-brunch.com/main/dashboard";
+    if (hostname === "www.manager.xiaoliangkouluwei.com") {
+      return "https://www.manager.xiaoliangkouluwei.com/main/dashboard";
     }
     
-    // 生產環境
-    if (hostname === "www.luwei.xincheng-brunch.com") {
-      return "https://www.luwei.xincheng-brunch.com";
+    if (hostname === "www.xiaoliangkouluwei.com") {
+      return "https://www.xiaoliangkouluwei.com";
     }
     
     // 預設重定向
-    return "https://www.luwei.xincheng-brunch.com";
+    return "https://www.xiaoliangkouluwei.com";
   } catch (error) {
     console.error("Invalid URL format:", error);
-    return "https://www.luwei.xincheng-brunch.com";
+    return "https://www.xiaoliangkouluwei.com";
   }
 }
 

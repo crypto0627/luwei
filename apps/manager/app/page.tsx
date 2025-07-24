@@ -120,7 +120,7 @@ export default function HomePage() {
               大竹小倆口滷味
             </div>
             <div className="text-sm text-gray-600">
-              管理後台登入
+              管理後台登入，請先至官網登入您的Google帳號
             </div>
           </div>
           <CardContent className="p-6 pt-0 space-y-4">

@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
 
 const slogans = [
-  "傳承30年的老滷汁配方",
-  "嚴選新鮮食材，每日現滷",
-  "獨家秘方，香氣四溢",
+  "週一至週五下單，隔週一即可取貨",
+  "傳承郭爸爸的老滷汁配方",
+  "嚴選新鮮食材，現滷最美味",
 ];
 
 const particlePositions = [
@@ -146,7 +146,7 @@ export function HeroSection() {
           <span className="text-amber-900">正宗台式滷味</span>
           <br />
           <span className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-400 bg-clip-text text-transparent">
-            傳承三代的好味道
+            傳承郭爸爸的老滷汁配方
           </span>
         </h1>
 

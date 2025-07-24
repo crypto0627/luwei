@@ -201,7 +201,7 @@ export class EmailService {
             <div class="contact-info">
               <h3>重要提醒</h3>
               <p>• 週一至週五下訂，隔週一即可取貨</p>
-              <p>• 取貨時間：週一 18:00-20:00</p>
+              <p>• 取貨時間：週一 10:00–14:00 16:30–19:00</p>
               <p>• 取貨地點：大竹小倆口滷味店面</p>
               <p>• 如有任何問題，請聯繫我們</p>
             </div>
@@ -216,7 +216,7 @@ export class EmailService {
       `;
 
       const result = await this.resend.emails.send({
-        from: 'mail-service-manager@xincheng-brunch.com',
+        from: 'mail-service@xiaoliangkouluwei.com',
         to: [to],
         subject: `訂單確認 - 訂單編號：${orderId} | 大竹小倆口滷味`,
         html: emailHtml,
@@ -249,7 +249,11 @@ export class EmailService {
         case 'completed':
           subject = `訂單已完成 - 訂單編號：${orderId} | 大竹小倆口滷味`;
           title = '訂單完成通知';
-          message = '您的訂單已處理完成！感謝您的耐心等候，期待您享用美味的滷味。';
+          message = `請到店取貨並付款<br>
+          營業時間<br>
+          10:00–14:00<br>
+          16:30–19:00<br>
+          地址 338桃園市蘆竹區中興路125-3號`;
           break;
         case 'paid':
           subject = `訂單已付款 - 訂單編號：${orderId} | 大竹小倆口滷味`;
@@ -364,7 +368,7 @@ export class EmailService {
       `;
 
       const result = await this.resend.emails.send({
-        from: 'mail-service-manager@xincheng-brunch.com',
+        from: 'mail-service@xiaoliangkouluwei.com',
         to: [to],
         subject,
         html: emailHtml,

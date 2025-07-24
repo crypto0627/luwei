@@ -11,16 +11,15 @@ export default function QuestionPage() {
               如何訂購餐點？
             </h2>
             <p className="text-gray-600">
-              您可以透過我們的網站或手機應用程式瀏覽菜單，選擇您喜愛的餐點並加入購物車。完成訂單後，我們會立即為您準備美味的餐點。
+              您可以透過我們的網站或手機將網站加入至桌面應用程式並瀏覽菜單，選擇您喜愛的餐點並加入購物車。完成訂單後，我們會立即為您準備美味的滷味。
             </p>
           </div>
-
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <h2 className="text-xl font-semibold text-amber-700 mb-3">
               外送範圍是哪裡？
             </h2>
             <p className="text-gray-600">
-              我們目前提供台北市區的外送服務，詳細範圍請參考網站上的外送區域地圖。如果您不確定是否在服務範圍內，歡迎致電詢問。
+              我們目前無提供外送服務，敬請期待。
             </p>
           </div>
 
@@ -29,16 +28,16 @@ export default function QuestionPage() {
               如何追蹤我的訂單？
             </h2>
             <p className="text-gray-600">
-              訂單確認後，您可以在訂單頁面查看即時訂單狀態。我們也會透過簡訊或電子郵件通知您訂單的最新狀態。
+              訂單確認後，您可以在首頁點選訂單頁面查看即時訂單狀態。我們也會透過電子郵件通知您訂單的最新狀態。
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <h2 className="text-xl font-semibold text-amber-700 mb-3">
-              可以客製化餐點嗎？
+              下單後，多久可以取餐？
             </h2>
             <p className="text-gray-600">
-              是的，我們提供多種客製化選項，包括調整辣度、配料選擇等。在下單時，您可以在備註欄位註明您的特殊需求。
+              若您訂餐時間在週一到週五，那麼我們會在隔週的週一用Mail通知您的訂單已完成，您只需要到店取貨並付款即可。
             </p>
           </div>
         </div>

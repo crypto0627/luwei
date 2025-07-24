@@ -11,7 +11,7 @@ const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.use(corsMiddleware);
 app.use(errorMiddleware);
-app.use(csrf({ origin: ["https://www.luwei.xincheng-brunch.com", "https://www.luwei-manager.xincheng-brunch.com"] }));
+app.use(csrf({ origin: ["https://www.manager.xiaoliangkouluwei.com", "https://www.xiaoliangkouluwei.com"] }));
 
 app.route("/api/auth", authRoute);
 app.route("/api/order", orderRoute);
