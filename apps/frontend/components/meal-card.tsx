@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Meal } from "@/lib/types";
+import { Meal } from "@/types/cart-types";
 import { useCart } from "@/contexts/cart-context";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -119,7 +119,7 @@ export function MealCard({ meal }: MealCardProps) {
               className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-full py-1 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
               <ShoppingCart className="w-4 h-4" />
-              Add to Cart
+              加入購物車
             </Button>
           </div>
         </div>
