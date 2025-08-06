@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import authService from '@/services/auth-service'
 import { User } from '@/types/auth-types'
 
@@ -14,40 +15,48 @@ interface UserState {
   logout: () => Promise<void>
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  user: null,
-  isLoading: false,
-  error: null,
-  
-  setUser: (user) => set({ user }),
-  setLoading: (isLoading) => set({ isLoading }),
-  setError: (error) => set({ error }),
-  
-  fetchUser: async () => {
-    try {
-      set({ isLoading: true, error: null })
-      const user = await authService.getCurrentUser()
-      set({ user, isLoading: false })
-    } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'An error occurred', 
-        isLoading: false 
-      })
-    }
-  },
-  
-  clearUser: () => set({ user: null, error: null }),
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isLoading: false,
+      error: null,
 
-  logout: async () => {
-    try {
-      set({ isLoading: true, error: null })
-      await authService.logout()
-      set({ user: null, isLoading: false })
-    } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'An error occurred', 
-        isLoading: false 
-      })
+      setUser: (user) => set({ user }),
+      setLoading: (isLoading) => set({ isLoading }),
+      setError: (error) => set({ error }),
+
+      fetchUser: async () => {
+        try {
+          set({ isLoading: true, error: null })
+          const user = await authService.getCurrentUser()
+          set({ user, isLoading: false })
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          })
+        }
+      },
+
+      clearUser: () => set({ user: null, error: null }),
+
+      logout: async () => {
+        try {
+          set({ isLoading: true, error: null })
+          await authService.logout()
+          set({ user: null, isLoading: false })
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'An error occurred',
+            isLoading: false
+          })
+        }
+      }
+    }),
+    {
+      name: 'user-store',
+      partialize: (state) => ({ user: state.user }), // Only persist user, not loading/error
     }
-  }
-}))
+  )
+)

@@ -10,6 +10,7 @@
 	"dependencies": {
 		"@hono/oauth-providers": "^0.8.1",
 		"bcryptjs": "^3.0.2",
+		"better-sqlite3": "^12.2.0",
 		"drizzle-kit": "^0.31.1",
 		"drizzle-orm": "^0.44.2",
 		"hono": "^4.7.11",

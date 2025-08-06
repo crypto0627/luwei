@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2b7d1c80-0537-4dbb-b35c-6302a0661451",
+  "id": "f54f6e31-5134-43d5-b102-4fb11fafdc2b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cart_items": {
@@ -327,13 +327,12 @@
           "notNull": true,
           "autoincrement": false
         },
-        "provider": {
-          "name": "provider",
+        "phone": {
+          "name": "phone",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'google'"
+          "notNull": false,
+          "autoincrement": false
         },
         "email_verified": {
           "name": "email_verified",

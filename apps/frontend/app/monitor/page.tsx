@@ -8,7 +8,7 @@ import { format, addWeeks, nextMonday, isWeekend } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import { Order } from '@/types/order.types';
 import { AlertCircle, MapPin } from 'lucide-react';
-import { Loading } from '@/components/ui/loading';
+import { PageLoading } from '@/components/ui/loading';
 
 export default function MonitorPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -18,7 +18,11 @@ export default function MonitorPage() {
   const fetchOrders = async () => {
     try {
       const response = await orderService.monitor();
-      setOrders(response.orders);
+      // 按時間排序，最新的在最上面
+      const sortedOrders = response.orders.sort((a: Order, b: Order) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setOrders(sortedOrders);
       setError(null);
     } catch (err) {
       setError('無法載入訂單資訊');
@@ -56,10 +60,7 @@ export default function MonitorPage() {
   if (loading) {
     return (
       <div className="h-screen w-full overflow-y-auto pt-24 container mx-auto p-4">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <Loading size="lg" />
-          <div className="text-amber-600">載入中...</div>
-        </div>
+        <PageLoading message="載入訂單資訊中..." />
       </div>
     );
   }

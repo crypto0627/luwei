@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu, Utensils, User, LogOut, Package } from "lucide-react";
+import { Menu, Utensils, User, LogOut, Package, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -44,6 +44,13 @@ export function Navbar() {
   const handleTrackOrder = () => {
     router.push("/monitor");
   };
+
+  const handleManagerPage = () => {
+    router.push("/manager");
+  };
+
+  // 簡單的管理員檢查（實際應用中應該從後端驗證）
+  const isAdmin = user?.email === 'admin@example.com' || user?.email?.includes('admin');
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-amber-200 shadow-sm">
@@ -104,6 +111,16 @@ export function Navbar() {
                     <Package className="w-4 h-4" />
                     <span>追蹤訂單</span>
                   </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={handleManagerPage}
+                      variant="outline"
+                      className="border-amber-200 text-amber-600 hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 hover:scale-105 flex items-center gap-2 font-tc"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>訂單管理</span>
+                    </Button>
+                  )}
                   <Button
                     onClick={handleLogout}
                     variant="outline"
@@ -187,6 +204,18 @@ export function Navbar() {
                         <Package className="w-4 h-4 mr-2" />
                         追蹤訂單
                       </Button>
+                      {isAdmin && (
+                        <Button
+                          onClick={() => {
+                            handleManagerPage();
+                            setIsOpen(false);
+                          }}
+                          className="w-full bg-amber-600 hover:bg-amber-700 text-white transition-all duration-300 hover:scale-105 font-tc"
+                        >
+                          <Settings className="w-4 h-4 mr-2" />
+                          訂單管理
+                        </Button>
+                      )}
                       <Button
                         onClick={() => {
                           handleLogout();

@@ -199,6 +199,10 @@ export class EmailService {
             </table>
             
             <div class="contact-info">
+              <h3>聯絡資訊</h3>
+              <p>地址：338桃園市蘆竹區中興路125-3號</p>
+              <p>電話：0975-826-557</p>
+              <p>LINE：@506khxyg</p>
               <h3>重要提醒</h3>
               <p>• 週一至週五下訂，隔週一即可取貨</p>
               <p>• 取貨時間： 週一至週六 10:00–14:00 16:30–19:00</p>
@@ -233,7 +237,7 @@ export class EmailService {
     to: string,
     userName: string,
     orderId: string,
-    status: 'cancelled' | 'completed' | 'paid'
+    status: 'cancelled' | 'completed'
   ) {
     try {
       let subject = '';
@@ -255,11 +259,11 @@ export class EmailService {
           16:30–19:00<br>
           地址 338桃園市蘆竹區中興路125-3號`;
           break;
-        case 'paid':
-          subject = `訂單已付款 - 訂單編號：${orderId} | 大竹小倆口滷味`;
-          title = '付款成功通知';
-          message = '我們已收到您的款項。您的訂單狀態已更新為「已付款」，感謝您的購買！';
-          break;
+        // case 'paid':
+        //   subject = `訂單已付款 - 訂單編號：${orderId} | 大竹小倆口滷味`;
+        //   title = '付款成功通知';
+        //   message = '我們已收到您的款項。您的訂單狀態已更新為「已付款」，感謝您的購買！';
+        //   break;
       }
 
       const emailHtml = `

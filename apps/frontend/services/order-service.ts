@@ -32,11 +32,11 @@ export class OrderService {
     };
   }
 
-  async checkout(items: CartItem[]) {
+  async checkout(items: CartItem[], phone?: string) {
     try {
       const response = await axios.post(
         `${API_URL}/checkout`,
-        { items },
+        { items, phone },
         { 
           headers: this.getHeaders(),
           withCredentials: true
@@ -53,6 +53,38 @@ export class OrderService {
       const response = await axios.post(
         `${API_URL}/monitor`,
         {},  // empty body
+        { 
+          headers: this.getHeaders(),
+          withCredentials: true
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getAllOrders() {
+    try {
+      const response = await axios.post(
+        `${API_URL}/manager/all`,
+        {},  // empty body
+        { 
+          headers: this.getHeaders(),
+          withCredentials: true
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async updateOrderStatus(orderId: string, status: 'pending' | 'paid' | 'completed' | 'cancelled') {
+    try {
+      const response = await axios.post(
+        `${API_URL}/manager/update-status`,
+        { orderId, status },
         { 
           headers: this.getHeaders(),
           withCredentials: true

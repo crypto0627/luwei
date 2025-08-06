@@ -57,23 +57,42 @@ export class AuthService {
 
   public async handleCredentialResponse(response: any) {
     try {
+      console.log("Sending credential to backend:", {
+        credential_length: response.credential?.length,
+        redirect_uri: window.location.origin
+      });
+      
       const res = await axios.post(`${API_URL}/google/callback`, {
         credential: response.credential,
         redirect_uri: window.location.origin,
       }, {
         headers: this.getHeaders(),
-        withCredentials: true, // ⬅️ 這非常重要！確保 Safari 設 Cookie
-      });
-      const cookie_res = await axios.post(`${API_URL}/set-cookie`, { token: res.data.token }, {
         withCredentials: true,
-        headers: { "X-API-Key": this.apiKey },
+        timeout: 10000 // 10 second timeout
       });
-      if (cookie_res.data.message === "Cookie set") {
-        window.location.href = res.data.redirectUrl;
+      
+      console.log("Backend response:", res.data);
+      
+      if (res.data.token) {
+        const cookie_res = await axios.post(`${API_URL}/set-cookie`, { 
+          token: res.data.token 
+        }, {
+          withCredentials: true,
+          headers: this.getHeaders(),
+        });
+        
+        console.log("Cookie set response:", cookie_res.data);
+        
+        if (cookie_res.data.message === "Cookie set") {
+          window.location.href = res.data.redirectUrl || window.location.origin;
+        } else {
+          throw new Error("Failed to set cookie");
+        }
       } else {
-        throw new Error("Failed to set cookie");
+        throw new Error("No token received from backend");
       }
     } catch (error) {
+      console.error("Auth error details:", error);
       throw this.handleError(error);
     }
   }

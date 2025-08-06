@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useUserStore } from "@/stores/useUserStore"
 import authService from "@/services/auth-service"
 
-// Add type declaration for Google Identity Services
+// Google Identity Services type declaration
 declare global {
   interface Window {
     google: {
@@ -24,6 +24,9 @@ declare global {
               theme?: string;
               size?: string;
               width?: string;
+              logo_alignment?: string;
+              text?: string;
+              shape?: string;
             }
           ) => void;
         };
@@ -38,6 +41,12 @@ export default function HomePage() {
   const googleInitialized = useRef(false)
   const googleSignInContainerRef = useRef<HTMLDivElement>(null)
 
+  // Reset scroll and any global state if needed
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    // Add more reset logic here if needed
+  }, [])
+
   useEffect(() => {
     const checkAuth = async () => {
       await fetchUser()
@@ -45,7 +54,6 @@ export default function HomePage() {
         router.push("/main/dashboard")
       }
     }
-
     checkAuth()
   }, [router, user, fetchUser])
 
@@ -60,12 +68,12 @@ export default function HomePage() {
     // Initialize Google Sign-In when script is loaded
     const initializeGoogle = () => {
       if (googleInitialized.current) return;
-      
+
       const interval = setInterval(() => {
-        if (window.google) {
+        if (window.google && googleSignInContainerRef.current) {
           clearInterval(interval);
           googleInitialized.current = true;
-          
+
           window.google.accounts.id.initialize({
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
             callback: async (response: any) => {
@@ -80,12 +88,15 @@ export default function HomePage() {
           });
 
           window.google.accounts.id.renderButton(
-            document.getElementById('google-signin-container'),
-            { 
-              type: 'standard', 
-              theme: 'outline', 
+            googleSignInContainerRef.current,
+            {
+              type: 'standard',
+              theme: 'filled_blue',
               size: 'large',
-              width: '100%'
+              width: '100%',
+              logo_alignment: 'center',
+              text: 'signin_with',
+              shape: 'pill'
             }
           );
         }
@@ -102,8 +113,11 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white/80"></div>
+          <span className="text-white text-lg font-semibold tracking-wide drop-shadow">載入中...</span>
+        </div>
       </div>
     )
   }
@@ -111,24 +125,26 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="border-0 shadow-2xl bg-white">
-          <div className="flex flex-col p-6 text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">滷</span>
+        <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-md">
+          <div className="flex flex-col p-8 text-center space-y-6">
+            <div className="mx-auto w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-4xl font-extrabold text-white drop-shadow-lg">滷</span>
             </div>
-            <div className="tracking-tight text-2xl font-bold text-gray-800">
+            <div className="tracking-tight text-3xl font-extrabold text-gray-800 drop-shadow-sm">
               大竹小倆口滷味
             </div>
-            <div className="text-sm text-gray-600">
-              管理後台登入，請先至官網登入您的Google帳號
+            <div className="text-base text-gray-600 font-medium">
+              <span className="block mb-1">管理後台登入</span>
+              <span className="text-sm text-gray-500">請先至官網登入您的 Google 帳號</span>
             </div>
           </div>
-          <CardContent className="p-6 pt-0 space-y-4">
-            <div ref={googleSignInContainerRef} className="w-full">
-              {/* Google Sign-In button will be rendered here */}
-            </div>
+          <CardContent className="p-8 pt-0 space-y-4">
+            <div ref={googleSignInContainerRef} className="w-full flex justify-center" />
           </CardContent>
         </Card>
+        <div className="mt-8 text-center text-xs text-white/80 tracking-wide">
+          &copy; {new Date().getFullYear()} 大竹小倆口滷味．All Rights Reserved
+        </div>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ButtonLoading } from "@/components/ui/loading";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CartItem } from "@/types/cart-types";
@@ -13,6 +13,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [pickupDate, setPickupDate] = useState("");
+  const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -48,9 +49,34 @@ export default function CheckoutPage() {
   }, []);
 
   const handleCheckout = async () => {
+    // 驗證電話號碼
+    if (!phone.trim()) {
+      await Swal.fire({
+        title: '請輸入電話號碼',
+        text: '電話號碼為必填項目',
+        icon: 'warning',
+        confirmButtonText: '確定',
+        confirmButtonColor: '#d97706'
+      });
+      return;
+    }
+
+    // 驗證電話號碼格式（台灣手機或市話）
+    const phoneRegex = /^[0-9]{8,9}$/;
+    if (!phoneRegex.test(phone)) {
+      await Swal.fire({
+        title: '電話號碼格式錯誤',
+        text: '請輸入正確的台灣電話號碼（8-9位數字）',
+        icon: 'warning',
+        confirmButtonText: '確定',
+        confirmButtonColor: '#d97706'
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
-      await orderService.checkout(cartItems);
+      await orderService.checkout(cartItems, `+886${phone}`);
       await Swal.fire({
         title: '訂單已送出！',
         text: '感謝您的訂購',
@@ -124,6 +150,27 @@ export default function CheckoutPage() {
                   查看地圖
                 </a>
               </div>
+              <div className="space-y-2">
+                <label className="text-amber-700 font-medium">聯絡電話 *</label>
+                <div className="flex items-center gap-2">
+                  <span className="bg-gray-100 px-3 py-2 rounded-lg text-gray-700 font-medium">+886</span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => {
+                      // 只允許數字輸入
+                      const value = e.target.value.replace(/\D/g, '');
+                      setPhone(value);
+                    }}
+                    placeholder="請輸入電話號碼（例：912345678 或 0223456789）"
+                    className="flex-1 px-3 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    maxLength={10}
+                  />
+                </div>
+                <p className="text-sm text-amber-600">
+                  請輸入手機號碼（9開頭）或市話號碼（02、03等開頭）
+                </p>
+              </div>
               <div className="flex justify-between items-center">
                 <span className="text-amber-700">支付方式</span>
                 <span className="font-medium">到店現金支付</span>
@@ -137,13 +184,15 @@ export default function CheckoutPage() {
         </div>
 
         <div className="flex justify-center">
-          <Button
+          <ButtonLoading
+            loading={isLoading}
+            loadingText="處理訂單中..."
             onClick={handleCheckout}
-            disabled={isLoading}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 text-lg font-medium rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            size="lg"
+            className="px-8 py-3 transition-all duration-300 hover:scale-105"
           >
-            {isLoading ? "處理中..." : "確認結帳"}
-          </Button>
+            確認結帳
+          </ButtonLoading>
         </div>
       </div>
     </div>

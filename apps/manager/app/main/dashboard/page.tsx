@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useOrderStore } from "@/stores/useOrderStore"
 import Swal from "sweetalert2"
@@ -9,9 +9,10 @@ import Loading from "@/components/loading"
 import StatsCards from "@/components/dashboard/StatsCards"
 import OrderCard from "@/components/dashboard/OrderCard"
 import OrderTable from "@/components/dashboard/OrderTable"
-import { Order } from "@/types/order"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function DashboardPage() {
+  const isMobile = useIsMobile()
   const [activeTab, setActiveTab] = useState("all")
   const { orders, isLoading, error, fetchOrders, deleteOrder, completeOrder } = useOrderStore()
 
@@ -63,7 +64,7 @@ export default function DashboardPage() {
     if (activeTab === "completed") return order.status === "completed"
     if (activeTab === "uncompleted") return order.status !== "completed"
     return true
-  })
+  }).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 
   const stats = {
     total: orders.length,
@@ -82,51 +83,40 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="flex-1 p-4 md:p-8 space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">訂單管理</h1>
-        <p className="text-sm md:text-base text-orange-100">管理所有訂單狀態與詳細資訊</p>
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">訂單管理</h1>
+        <p className="text-sm md:text-base text-muted-foreground">管理所有訂單狀態與詳細資訊</p>
       </div>
 
       {/* Stats Cards */}
       <StatsCards stats={stats} />
 
       {/* Orders List */}
-      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-        <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-lg md:text-xl">訂單列表</CardTitle>
-          <CardDescription className="text-sm md:text-base">查看和管理所有訂單</CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3 p-1">
+      <Card className="border-0 shadow-none bg-background/50">
+        <CardContent className="p-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3 p-1 rounded-xl">
               <TabsTrigger value="all" className="text-sm md:text-base">全部訂單</TabsTrigger>
               <TabsTrigger value="completed" className="text-sm md:text-base">已完成</TabsTrigger>
               <TabsTrigger value="uncompleted" className="text-sm md:text-base">未完成</TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeTab} className="space-y-4">
-              {/* Mobile View */}
-              <div className="lg:hidden space-y-4">
-                {filteredOrders.map((order) => (
-                  <OrderCard key={order.id} order={order} onAction={handleOrderAction} />
-                ))}
-              </div>
-
-              {/* Tablet View */}
-              <div className="hidden lg:block 2xl:hidden">
-                <div className="grid grid-cols-2 gap-4">
+            <TabsContent value={activeTab} className="space-y-4 mt-4">
+              {isMobile ? (
+                <div className="space-y-4">
                   {filteredOrders.map((order) => (
                     <OrderCard key={order.id} order={order} onAction={handleOrderAction} />
                   ))}
                 </div>
-              </div>
-
-              {/* Desktop View */}
-              <div className="hidden 2xl:block">
-                <OrderTable orders={filteredOrders} onAction={handleOrderAction} />
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-4">
+                  {filteredOrders.map((order) => (
+                    <OrderCard key={order.id} order={order} onAction={handleOrderAction} />
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

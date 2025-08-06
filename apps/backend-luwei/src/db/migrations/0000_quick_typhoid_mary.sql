@@ -45,7 +45,7 @@ CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`name` text NOT NULL,
-	`provider` text DEFAULT 'google' NOT NULL,
+	`phone` text,
 	`email_verified` integer DEFAULT false,
 	`created_at` integer DEFAULT (strftime('%s', 'now')),
 	`updated_at` integer DEFAULT (strftime('%s', 'now'))

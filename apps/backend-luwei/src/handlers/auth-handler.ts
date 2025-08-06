@@ -10,11 +10,11 @@ export const logout = async (c: Context) => {
   const token = getCookie(c, "auth_token");
   if (!token) return c.json({ error: "您尚未登入" }, 401);
 
-  await deleteCookie(c, "auth_token", {
+  deleteCookie(c, "auth_token", {
     httpOnly: true,
-    secure: false,
+    secure: c.env.NODE_ENV === 'production',
     path: "/",
-    sameSite: "lax",
+    sameSite: c.env.NODE_ENV === 'production' ? "none" : "lax",
   });
 
   return c.json({ message: "已登出" });
@@ -25,7 +25,7 @@ export const me = async (c: Context) => {
     const db = getDB(c);
     const jwtPayload = c.get("jwtPayload");
     const userId = jwtPayload.sub;
-    
+
     if (!userId) {
       return c.json({ error: "Invalid token" }, 401);
     }
@@ -50,21 +50,69 @@ export const me = async (c: Context) => {
 
 export const handleGoogleCallback = async (c: Context) => {
   try {
+    console.log("=== Google Callback Handler Started ===");
     const db = getDB(c);
-    const { credential, redirect_uri } = await c.req.json();
+
+    let body;
+    try {
+      body = await c.req.json();
+      console.log("Received request body:", JSON.stringify(body, null, 2));
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      return c.json({ error: "Invalid request body" }, 400);
+    }
+
+    const { credential, redirect_uri } = body;
 
     if (!credential) {
+      console.error("No credential provided in request");
       return c.json({ error: "No credential provided" }, 400);
     }
 
+    console.log("Credential received, length:", credential.length);
+
     // Decode the JWT token without verification
-    const [headerB64, payloadB64] = credential.split('.');
-    const payload = JSON.parse(atob(payloadB64));
+    const parts = credential.split('.');
+    if (parts.length !== 3) {
+      console.error("Invalid JWT format, parts:", parts.length);
+      return c.json({ error: "Invalid credential format" }, 400);
+    }
+
+    const [, payloadB64] = parts;
+    let payload;
+    try {
+      // Add padding if needed for base64 decoding
+      const paddedPayload = payloadB64 + '='.repeat((4 - payloadB64.length % 4) % 4);
+      const decodedPayload = atob(paddedPayload);
+      payload = JSON.parse(decodedPayload);
+      console.log("Decoded payload:", JSON.stringify(payload, null, 2));
+    } catch (error) {
+      console.error("Failed to decode credential payload:", error);
+      return c.json({ error: "Invalid credential payload" }, 400);
+    }
 
     // Verify the token issuer and audience
-    if (payload.iss !== 'https://accounts.google.com' || 
-        payload.aud !== c.env.GOOGLE_ID) {
-      return c.json({ error: "Invalid Google token" }, 401);
+    console.log("Environment check:", {
+      GOOGLE_ID: c.env.GOOGLE_ID ? "SET" : "NOT SET",
+      JWT_SECRET: c.env.JWT_SECRET ? "SET" : "NOT SET"
+    });
+
+    console.log("Token verification:", {
+      iss: payload.iss,
+      aud: payload.aud,
+      expected_aud: c.env.GOOGLE_ID,
+      iss_valid: payload.iss === 'https://accounts.google.com',
+      aud_valid: payload.aud === c.env.GOOGLE_ID
+    });
+
+    if (payload.iss !== 'https://accounts.google.com') {
+      console.error("Invalid issuer:", payload.iss);
+      return c.json({ error: "Invalid Google token issuer" }, 401);
+    }
+
+    if (payload.aud !== c.env.GOOGLE_ID) {
+      console.error("Invalid audience:", { received: payload.aud, expected: c.env.GOOGLE_ID });
+      return c.json({ error: "Invalid Google token audience" }, 401);
     }
 
     // Check if token is expired
@@ -79,13 +127,13 @@ export const handleGoogleCallback = async (c: Context) => {
     // 根據不同環境決定重定向目標
     const fallback = "https://www.xiaoliangkouluwei.com";
     let redirectUrl = fallback;
-    
+
     if (redirect_uri) {
       redirectUrl = getRedirectUrl(redirect_uri);
       console.log("Final redirectUrl:", redirectUrl);
-      
+
       if (redirect_uri === "https://manager.xiaoliangkouluwei.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
-        return c.json({error: "You don't have permission.You are not manager!"}, 402);
+        return c.json({ error: "You don't have permission.You are not manager!" }, 402);
       }
     }
 
@@ -102,7 +150,7 @@ export const handleGoogleCallback = async (c: Context) => {
         id: uuidv4(),
         email: payload.email,
         name: payload.name,
-        provider: "google",
+        phone: null,
         emailVerified: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -118,12 +166,12 @@ export const handleGoogleCallback = async (c: Context) => {
       },
       c.env.JWT_SECRET
     );
-    
+
     setCookie(c, "auth_token", jwt_token, {
       httpOnly: true,
-      secure: true,
+      secure: c.env.NODE_ENV === 'production',
       path: "/",
-      sameSite: "none",
+      sameSite: c.env.NODE_ENV === 'production' ? "none" : "lax",
       maxAge: 60 * 60 * 24 * 150
     });
 
@@ -138,15 +186,21 @@ function getRedirectUrl(uri: string): string {
   try {
     const url = new URL(uri);
     const hostname = url.hostname;
-    
-    if (hostname === "manager.xiaoliangkouluwei.com") {
-      return "https://manager.xiaoliangkouluwei.com/main/dashboard";
+
+    switch (hostname) {
+      case "manager.xiaoliangkouluwei.com":
+        return "https://manager.xiaoliangkouluwei.com/main/dashboard";
+      case "www.xiaoliangkouluwei.com":
+        return "https://www.xiaoliangkouluwei.com";
+      case "localhost":
+        // Handle both localhost:3000 and localhost:3001
+        if (url.port === "3000") {
+          return "http://localhost:3000";
+        } else if (url.port === "3001") {
+          return "http://localhost:3001";
+        }
+        return "http://localhost:3000"; // default to 3000
     }
-    
-    if (hostname === "www.xiaoliangkouluwei.com") {
-      return "https://www.xiaoliangkouluwei.com";
-    }
-    
     // 預設重定向
     return "https://www.xiaoliangkouluwei.com";
   } catch (error) {
@@ -155,16 +209,15 @@ function getRedirectUrl(uri: string): string {
   }
 }
 
-export const setCookieSafari = async(c: Context) => {
+export const setCookieSafari = async (c: Context) => {
   const body = await c.req.json();
   const token = body.token;
   setCookie(c, "auth_token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: c.env.NODE_ENV === 'production',
+    sameSite: c.env.NODE_ENV === 'production' ? "none" : "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 150,
-
   });
   return c.json({ message: "Cookie set" }, 201);
 };

@@ -36,10 +36,20 @@ export const checkout = async (c: Context) => {
     }
 
     const body = await c.req.json();
-    const items = body.items;
+    const { items, phone } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return c.json({ error: "購物車是空的，無法結帳" }, 400);
+    }
+
+    if (!phone || !phone.trim()) {
+      return c.json({ error: "電話號碼為必填項目" }, 400);
+    }
+
+    // 驗證電話號碼格式（+886開頭，後面8-10位數字）
+    const phoneRegex = /^\+886[0-9]{8,10}$/;
+    if (!phoneRegex.test(phone)) {
+      return c.json({ error: "電話號碼格式錯誤" }, 400);
     }
 
     // Validate all meal IDs exist and check availability
@@ -66,6 +76,17 @@ export const checkout = async (c: Context) => {
     const totalAmount = items.reduce((sum, item) => {
       return sum + (item.meal.price * item.quantity);
     }, 0);
+
+    // Update user phone number if provided
+    if (phone && phone !== user.phone) {
+      await db
+        .update(users)
+        .set({ 
+          phone,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, user.id));
+    }
 
     // Create order
     const orderId = uuidv4();

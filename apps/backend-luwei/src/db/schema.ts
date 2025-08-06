@@ -5,7 +5,7 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  provider: text("provider").notNull().default("google"), // 'google' | 'line'
+  phone: text("phone"), // 電話號碼，格式為 +886xxxxxxxxx
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(strftime('%s', 'now'))`,

@@ -7,7 +7,7 @@ export const add_meals = async (c: Context) => {
   try {
     const db = getDB(c);
     const body = await c.req.json();
-    
+
     // Validate required fields
     if (!Array.isArray(body)) {
       return c.json({ error: "Request body must be an array" }, 400);

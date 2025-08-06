@@ -11,7 +11,7 @@ const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.use(corsMiddleware);
 app.use(errorMiddleware);
-app.use(csrf({ origin: ["https://manager.xiaoliangkouluwei.com", "https://www.xiaoliangkouluwei.com"] }));
+app.use(csrf({ origin: ["https://manager.xiaoliangkouluwei.com", "https://www.xiaoliangkouluwei.com", "http://localhost:3000", "http://localhost:3001"] }));
 
 app.route("/api/auth", authRoute);
 app.route("/api/order", orderRoute);

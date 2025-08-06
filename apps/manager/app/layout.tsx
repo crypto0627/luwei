@@ -77,7 +77,37 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600">{children}</div>
+        {/* 背景裝飾 */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 60% 20%, #fbbf24cc 0%, #f59e42bb 40%, #f472b6aa 80%, #f59e42 100%), linear-gradient(120deg, #f59e42 0%, #fbbf24 50%, #f472b6 100%)",
+            opacity: 0.95,
+          }}
+        />
+        
+        {/* 裝飾性圓形光斑 */}
+        <div
+          aria-hidden="true"
+          className="fixed top-[-120px] left-[-80px] w-[320px] h-[320px] rounded-full opacity-40 blur-3xl z-0"
+          style={{
+            background: "radial-gradient(circle, #f472b6 0%, #fbbf24 100%)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="fixed bottom-[-100px] right-[-100px] w-[300px] h-[300px] rounded-full opacity-30 blur-2xl z-0"
+          style={{
+            background: "radial-gradient(circle, #fbbf24 0%, #f59e42 100%)",
+          }}
+        />
+        
+        {/* 主要內容 */}
+        <div className="relative z-10 min-h-screen">
+          {children}
+        </div>
       </body>
     </html>
   )
