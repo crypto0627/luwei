@@ -338,17 +338,19 @@ export const completeOrder = async (c: Context) => {
       })
       .where(eq(orders.id, orderId));
 
-    // Send status update email
-    try {
-      const emailService = EmailService.getInstance(c.env.RESEND_API_KEY);
-      await emailService.sendOrderStatusUpdateEmail(
-        orderData.userEmail,
-        orderData.userName,
-        orderId,
-        status
-      );
-    } catch (emailError) {
-      console.error(`Failed to send order ${status} email:`, emailError);
+    // Send status update email only if status is not 'paid'
+    if (status !== 'paid') {
+      try {
+        const emailService = EmailService.getInstance(c.env.RESEND_API_KEY);
+        await emailService.sendOrderStatusUpdateEmail(
+          orderData.userEmail,
+          orderData.userName,
+          orderId,
+          status
+        );
+      } catch (emailError) {
+        console.error(`Failed to send order ${status} email:`, emailError);
+      }
     }
 
     return c.json({

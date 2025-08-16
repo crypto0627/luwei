@@ -19,6 +19,7 @@ export interface User {
   id: string
   email: string
   name: string
+  phone: string // Ensure 'phone' is required
   provider: string
   emailVerified: boolean
 }
@@ -31,7 +32,7 @@ export interface Order {
   createdAt: string
   updatedAt: string
   items: OrderItem[]
-  user: User
+  user: User // 'user' must include 'phone' property
 }
 
 export interface Stats {

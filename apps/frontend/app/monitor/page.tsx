@@ -9,12 +9,14 @@ import { zhTW } from 'date-fns/locale';
 import { Order } from '@/types/order.types';
 import { AlertCircle, MapPin } from 'lucide-react';
 import { PageLoading } from '@/components/ui/loading';
+import { useUserStore } from '@/stores/useUserStore';
 
 export default function MonitorPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { user } = useUserStore()
+  
   const fetchOrders = async () => {
     try {
       const response = await orderService.monitor();
@@ -96,6 +98,7 @@ export default function MonitorPage() {
                     <div className="text-sm text-gray-600">
                       建立時間: {format(new Date(order.createdAt), 'PPP p', { locale: zhTW })}
                     </div>
+                    <p className="text-sm text-gray-600">電話號碼：{user?.phone}</p>
                     <div className="text-sm text-amber-700 font-medium">
                       預計取貨時間: {getPickupDate(order.createdAt)}
                       <div className="text-xs text-gray-500 mt-1">

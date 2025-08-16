@@ -19,6 +19,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   userId: string;
+  phone: string;
   status: 'pending' | 'paid' | 'completed' | 'cancelled';
   totalAmount: number;
   createdAt: string;

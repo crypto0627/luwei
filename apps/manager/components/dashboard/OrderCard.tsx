@@ -37,6 +37,11 @@ export default function OrderCard({ order, onAction }: OrderCardProps) {
         </div>
 
         <div className="space-y-1">
+          <p className="text-xs font-semibold text-yellow-700 tracking-wide">客戶電話</p>
+          <p className="text-sm font-medium text-gray-700 select-all">{order.user.phone}</p>
+        </div>
+
+        <div className="space-y-1">
           <p className="text-xs font-semibold text-yellow-700 tracking-wide">商品</p>
           <div className="space-y-1">
             {order.items.map((item) => (

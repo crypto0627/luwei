@@ -259,11 +259,6 @@ export class EmailService {
           16:30–19:00<br>
           地址 338桃園市蘆竹區中興路125-3號`;
           break;
-        // case 'paid':
-        //   subject = `訂單已付款 - 訂單編號：${orderId} | 大竹小倆口滷味`;
-        //   title = '付款成功通知';
-        //   message = '我們已收到您的款項。您的訂單狀態已更新為「已付款」，感謝您的購買！';
-        //   break;
       }
 
       const emailHtml = `

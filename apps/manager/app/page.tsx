@@ -41,21 +41,18 @@ export default function HomePage() {
   const googleInitialized = useRef(false)
   const googleSignInContainerRef = useRef<HTMLDivElement>(null)
 
-  // Reset scroll and any global state if needed
   useEffect(() => {
-    window.scrollTo(0, 0)
-    // Add more reset logic here if needed
+    // Only fetch user on mount
+    fetchUser()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    const checkAuth = async () => {
-      await fetchUser()
-      if (user) {
-        router.push("/main/dashboard")
-      }
+    // When user is set, redirect
+    if (user) {
+      router.push("/main/dashboard")
     }
-    checkAuth()
-  }, [router, user, fetchUser])
+  }, [user, router])
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -109,7 +106,7 @@ export default function HomePage() {
       document.head.removeChild(script);
       googleInitialized.current = false;
     };
-  }, [router, fetchUser]);
+  }, [fetchUser]);
 
   if (isLoading) {
     return (

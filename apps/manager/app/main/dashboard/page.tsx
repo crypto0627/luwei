@@ -8,7 +8,6 @@ import Swal from "sweetalert2"
 import Loading from "@/components/loading"
 import StatsCards from "@/components/dashboard/StatsCards"
 import OrderCard from "@/components/dashboard/OrderCard"
-import OrderTable from "@/components/dashboard/OrderTable"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function DashboardPage() {
@@ -59,12 +58,15 @@ export default function DashboardPage() {
     }
   }
 
-  const filteredOrders = orders.filter((order) => {
-    if (activeTab === "all") return true
-    if (activeTab === "completed") return order.status === "completed"
-    if (activeTab === "uncompleted") return order.status !== "completed"
-    return true
-  }).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  // 依照 createdAt 由新到舊排序
+  const filteredOrders = orders
+    .filter((order) => {
+      if (activeTab === "all") return true
+      if (activeTab === "completed") return order.status === "completed"
+      if (activeTab === "uncompleted") return order.status !== "completed"
+      return true
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   const stats = {
     total: orders.length,

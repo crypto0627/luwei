@@ -61,20 +61,14 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <div
         className={cn(
-          "min-h-screen transition-all duration-300",
+          "min-h-screen transition-all duration-300 flex-1",
           !isMobile && "lg:ml-[var(--sidebar-width)]"
         )}
       >
         {/* Mobile Navbar */}
         {isMobile && <Navbar onMenuClick={() => setSidebarOpen(true)} />}
         
-        {/* Content */}
-        <main className={cn(
-          "p-4 sm:p-8 overflow-y-auto",
-          isMobile ? "h-[calc(100vh-5rem)]" : "min-h-screen"
-        )}>
           {children}
-        </main>
       </div>
     </SidebarProvider>
   );
