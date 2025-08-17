@@ -167,7 +167,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <img class="logo" src="https://xiaoliangkouluwei.com/logo.webp" alt="大竹小倆口滷味 Logo" style="width: 48px; height: 48px; border-radius: 50%;" />
+              <img class="logo" src="https://www.xiaoliangkouluwei.com/images/logo.webp" alt="大竹小倆口滷味 Logo" style="width: 48px; height: 48px; border-radius: 50%;" />
               <h1 class="title">大竹小倆口滷味</h1>
               <p class="subtitle">訂單確認通知</p>
             </div>
@@ -237,12 +237,65 @@ export class EmailService {
     to: string,
     userName: string,
     orderId: string,
-    status: 'cancelled' | 'completed'
+    status: 'cancelled' | 'completed',
+    orderItems?: Array<{
+      meal: {
+        name: string;
+        price: number;
+      };
+      quantity: number;
+    }>,
+    totalAmount?: number
   ) {
     try {
       let subject = '';
       let title = '';
       let message = '';
+      let itemsHtml = '';
+      let tableHtml = '';
+      let pickupInfoHtml = '';
+
+      if (status === 'completed' && orderItems && typeof totalAmount === 'number') {
+        // 構建訂單明細表格
+        itemsHtml = orderItems
+          .map(
+            (item) => `
+            <tr>
+              <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.meal.name}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">NT$ ${item.meal.price.toLocaleString()}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">NT$ ${(item.meal.price * item.quantity).toLocaleString()}</td>
+            </tr>
+          `
+          )
+          .join('');
+        tableHtml = `
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>商品名稱</th>
+                <th style="text-align: center;">數量</th>
+                <th style="text-align: right;">單價</th>
+                <th style="text-align: right;">小計</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+              <tr class="total-row">
+                <td colspan="3" style="text-align: right;">總計：</td>
+                <td style="text-align: right;">NT$ ${totalAmount.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+        pickupInfoHtml = `
+          <div class="contact-info">
+            <h3>取貨資訊</h3>
+            <p>取貨時間：週一至週六 10:00–14:00 16:30–19:00</p>
+            <p>取貨地點：338桃園市蘆竹區中興路125-3號（大竹小倆口滷味店面）</p>
+          </div>
+        `;
+      }
 
       switch (status) {
         case 'cancelled':
@@ -253,11 +306,11 @@ export class EmailService {
         case 'completed':
           subject = `訂單已完成 - 訂單編號：${orderId} | 大竹小倆口滷味`;
           title = '訂單完成通知';
-          message = `請到店取貨並付款<br>
-          營業時間<br>
-          10:00–14:00<br>
-          16:30–19:00<br>
-          地址 338桃園市蘆竹區中興路125-3號`;
+          message = `
+            <p>請到店取貨並付款，以下為您的訂單明細：</p>
+            ${tableHtml}
+            ${pickupInfoHtml}
+          `;
           break;
       }
 
@@ -331,6 +384,33 @@ export class EmailService {
               color: #6b7280;
               font-size: 14px;
             }
+            .items-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 25px;
+              background-color: white;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            .items-table th {
+              background-color: #f59e0b;
+              color: white;
+              padding: 15px 12px;
+              text-align: left;
+              font-weight: bold;
+            }
+            .items-table th:last-child {
+              text-align: right;
+            }
+            .total-row {
+              background-color: #fef3c7;
+              font-weight: bold;
+            }
+            .total-row td {
+              padding: 15px 12px;
+              border-top: 2px solid #f59e0b;
+            }
             .footer {
               text-align: center;
               margin-top: 30px;
@@ -339,18 +419,33 @@ export class EmailService {
               color: #6b7280;
               font-size: 14px;
             }
+            .contact-info {
+              background-color: #f3f4f6;
+              border-radius: 8px;
+              padding: 15px;
+              margin-top: 20px;
+            }
+            .contact-info h3 {
+              color: #374151;
+              margin: 0 0 10px 0;
+              font-size: 16px;
+            }
+            .contact-info p {
+              margin: 5px 0;
+              color: #6b7280;
+            }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">滷</div>
+              <img class="logo" src="https://www.xiaoliangkouluwei.com/images/logo.webp" alt="大竹小倆口滷味 Logo" style="width: 48px; height: 48px; border-radius: 50%;" />
               <h1 class="title">大竹小倆口滷味</h1>
               <p class="subtitle">${title}</p>
             </div>
             
             <p>親愛的 ${userName}，您好！</p>
-            <p>${message}</p>
+            ${message}
             
             <div class="order-info">
               <div class="order-id">訂單編號：${orderId}</div>
