@@ -91,20 +91,6 @@ export const handleGoogleCallback = async (c: Context) => {
       return c.json({ error: "Invalid credential payload" }, 400);
     }
 
-    // Verify the token issuer and audience
-    console.log("Environment check:", {
-      GOOGLE_ID: c.env.GOOGLE_ID ? "SET" : "NOT SET",
-      JWT_SECRET: c.env.JWT_SECRET ? "SET" : "NOT SET"
-    });
-
-    console.log("Token verification:", {
-      iss: payload.iss,
-      aud: payload.aud,
-      expected_aud: c.env.GOOGLE_ID,
-      iss_valid: payload.iss === 'https://accounts.google.com',
-      aud_valid: payload.aud === c.env.GOOGLE_ID
-    });
-
     if (payload.iss !== 'https://accounts.google.com') {
       console.error("Invalid issuer:", payload.iss);
       return c.json({ error: "Invalid Google token issuer" }, 401);
@@ -127,12 +113,13 @@ export const handleGoogleCallback = async (c: Context) => {
     // 根據不同環境決定重定向目標
     const fallback = "https://www.xiaoliangkouluwei.com";
     let redirectUrl = fallback;
+    const allowEmail = ["jake0627a1@gmail.com", "sun200103240@gmail.com"];
 
     if (redirect_uri) {
       redirectUrl = getRedirectUrl(redirect_uri);
       console.log("Final redirectUrl:", redirectUrl);
 
-      if (redirect_uri === "https://manager.xiaoliangkouluwei.com/main/dashboard" && payload.email !== "jake0627a1@gmail.com") {
+      if (redirect_uri === "https://manager.xiaoliangkouluwei.com/main/dashboard" && !allowEmail.includes(payload.email)) {
         return c.json({ error: "You don't have permission.You are not manager!" }, 402);
       }
     }
